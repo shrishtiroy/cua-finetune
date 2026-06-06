@@ -1,0 +1,55 @@
+# ms-swift v4.0 SFT config for moonshotai/Kimi-VL-A3B-Instruct.
+# Run on a Lambda 1xH100 80GB instance:
+#   swift sft --config configs/kimi_vl_a3b.yaml
+#
+# Kimi-VL is MoE (16B total / ~3B active). DO NOT use ZeRO-3: it breaks LoRA
+# gradient flow on expert modules (modelscope/ms-swift#6173). ZeRO-2 only.
+# Kimi-VL also tends to emit non-JSON outputs out of the box; SFT should fix
+# that, but the eval backend has defensive JSON-extraction as a fallback.
+
+model: moonshotai/Kimi-VL-A3B-Instruct
+template: kimi_vl
+train_type: lora
+torch_dtype: bfloat16
+attn_impl: flash_attn
+
+# --- data ---
+dataset:
+  - ./data/cua_sft/train.jsonl
+val_dataset:
+  - ./data/cua_sft/test.jsonl
+dataset_num_proc: 4
+max_length: 8192
+truncation_strategy: delete
+
+# --- optimisation ---
+num_train_epochs: 3
+learning_rate: 1.0e-4
+warmup_ratio: 0.03
+lr_scheduler_type: cosine
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+weight_decay: 0.0
+
+# --- LoRA ---
+lora_rank: 64
+lora_alpha: 128
+lora_dropout: 0.05
+# Skip MoE router weights to avoid the documented gradient bug
+target_modules: all-linear
+target_regex: '.*(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj).*'
+freeze_vit: true
+freeze_aligner: true
+
+# --- bookkeeping ---
+output_dir: ./checkpoints/kimi_vl_a3b_cua
+logging_steps: 10
+save_steps: 500
+eval_steps: 500
+save_total_limit: 4
+report_to: tensorboard
+
+# --- distributed ---
+deepspeed: zero2  # ZeRO-3 + LoRA on MoE breaks expert-module gradient flow

@@ -1,0 +1,51 @@
+# ms-swift v4.0 SFT config for Qwen3-VL-8B-Instruct.
+# Run on a Lambda 1xH100 80GB instance:
+#   swift sft --config configs/qwen3_vl_8b.yaml
+#
+# Dense 8B model — easiest of the four. ZeRO-2 is fine; ZeRO-3 also works since
+# there are no MoE expert modules.
+
+model: Qwen/Qwen3-VL-8B-Instruct
+template: qwen3_vl
+train_type: lora
+torch_dtype: bfloat16
+attn_impl: flash_attn  # falls back to sdpa if FA install missing
+
+# --- data ---
+dataset:
+  - ./data/cua_sft/train.jsonl
+val_dataset:
+  - ./data/cua_sft/test.jsonl
+dataset_num_proc: 4
+max_length: 8192
+truncation_strategy: delete
+
+# --- optimisation ---
+num_train_epochs: 3
+learning_rate: 1.0e-4
+warmup_ratio: 0.03
+lr_scheduler_type: cosine
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+weight_decay: 0.0
+
+# --- LoRA ---
+lora_rank: 64
+lora_alpha: 128
+lora_dropout: 0.05
+target_modules: all-linear
+freeze_vit: true
+freeze_aligner: true
+
+# --- bookkeeping ---
+output_dir: ./checkpoints/qwen3_vl_8b_cua
+logging_steps: 10
+save_steps: 500
+eval_steps: 500
+save_total_limit: 4
+report_to: tensorboard
+
+# --- distributed ---
+deepspeed: zero2  # change to zero3 if VRAM tight; keep zero2 for parity with MoE configs

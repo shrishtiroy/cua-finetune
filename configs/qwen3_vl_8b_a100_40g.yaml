@@ -1,0 +1,54 @@
+# ms-swift v4.0 SFT config for Qwen3-VL-8B-Instruct on 1x A100 40GB (fallback
+# from H100). Differences vs qwen3_vl_8b.yaml:
+#   - max_length 8192 -> 6144 (cuts activation memory ~25%)
+#   - grad_accum 16 -> 24 (keeps effective batch size at 24 vs 16; minor change)
+#   - deepspeed zero2 -> zero3 (offload optimizer states for headroom)
+# Expected runtime: ~12 h (vs ~3.5 h on H100 SXM5).
+#
+# Run:
+#   swift sft --config configs/qwen3_vl_8b_a100_40g.yaml
+
+model: Qwen/Qwen3-VL-8B-Instruct
+template: qwen3_vl
+train_type: lora
+torch_dtype: bfloat16
+attn_impl: flash_attn  # falls back to sdpa if FA install missing
+
+# --- data ---
+dataset:
+  - ./data/cua_sft/train.jsonl
+val_dataset:
+  - ./data/cua_sft/test.jsonl
+dataset_num_proc: 4
+max_length: 6144
+truncation_strategy: delete
+
+# --- optimisation ---
+num_train_epochs: 3
+learning_rate: 1.0e-4
+warmup_ratio: 0.03
+lr_scheduler_type: cosine
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 24
+gradient_checkpointing: true
+weight_decay: 0.0
+
+# --- LoRA ---
+lora_rank: 64
+lora_alpha: 128
+lora_dropout: 0.05
+target_modules: all-linear
+freeze_vit: true
+freeze_aligner: true
+
+# --- bookkeeping ---
+output_dir: ./checkpoints/qwen3_vl_8b_cua_a100
+logging_steps: 10
+save_steps: 500
+eval_steps: 500
+save_total_limit: 4
+report_to: tensorboard
+
+# --- distributed ---
+deepspeed: zero3  # offload optimizer states to fit on 40 GB

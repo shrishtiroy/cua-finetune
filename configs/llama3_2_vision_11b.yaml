@@ -1,0 +1,52 @@
+# ms-swift v4.0 SFT config for meta-llama/Llama-3.2-11B-Vision-Instruct.
+# Run on a Lambda 1xH100 80GB instance:
+#   swift sft --config configs/llama3_2_vision_11b.yaml
+#
+# Llama-3.2-Vision uses the mllama architecture. flash_attention_2 has been
+# flaky on mllama in some versions of transformers; if you hit
+# "ValueError: mllama does not support FA2" or similar, switch to attn_impl: sdpa.
+
+model: meta-llama/Llama-3.2-11B-Vision-Instruct
+template: mllama
+train_type: lora
+torch_dtype: bfloat16
+attn_impl: sdpa  # mllama + FA2 is hit-or-miss; sdpa is safest default
+
+# --- data ---
+dataset:
+  - ./data/cua_sft/train.jsonl
+val_dataset:
+  - ./data/cua_sft/test.jsonl
+dataset_num_proc: 4
+max_length: 8192
+truncation_strategy: delete
+
+# --- optimisation ---
+num_train_epochs: 3
+learning_rate: 1.0e-4
+warmup_ratio: 0.03
+lr_scheduler_type: cosine
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+weight_decay: 0.0
+
+# --- LoRA ---
+lora_rank: 64
+lora_alpha: 128
+lora_dropout: 0.05
+target_modules: all-linear
+freeze_vit: true
+freeze_aligner: true
+
+# --- bookkeeping ---
+output_dir: ./checkpoints/llama3_2_vision_11b_cua
+logging_steps: 10
+save_steps: 500
+eval_steps: 500
+save_total_limit: 4
+report_to: tensorboard
+
+# --- distributed ---
+deepspeed: zero2

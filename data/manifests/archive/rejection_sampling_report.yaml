@@ -1,0 +1,49 @@
+pass_threshold_default: 1.0
+max_per_task: 3
+overrides: {}
+relaxation_log: []
+per_category:
+  C1_ecommerce:
+    pass_threshold_used: 1.0
+    candidate_tasks: 11
+    selected_tasks: 5
+    selected_trajectories: 5
+    avg_n_steps: 79.2
+  C2_structured:
+    pass_threshold_used: 1.0
+    candidate_tasks: 116
+    selected_tasks: 68
+    selected_trajectories: 98
+    avg_n_steps: 51.58
+  C3_government:
+    pass_threshold_used: 1.0
+    candidate_tasks: 18
+    selected_tasks: 13
+    selected_trajectories: 30
+    avg_n_steps: 70.3
+  C4_smb:
+    pass_threshold_used: 1.0
+    candidate_tasks: 2
+    selected_tasks: 1
+    selected_trajectories: 3
+    avg_n_steps: 18.33
+  C5_ehr:
+    pass_threshold_used: 1.0
+    candidate_tasks: 11
+    selected_tasks: 5
+    selected_trajectories: 7
+    avg_n_steps: 39.57
+  C6_unscoped_search:
+    pass_threshold_used: 1.0
+    candidate_tasks: 8
+    selected_tasks: 0
+    selected_trajectories: 0
+    avg_n_steps: 0.0
+  C99_other:
+    pass_threshold_used: 1.0
+    candidate_tasks: 79
+    selected_tasks: 58
+    selected_trajectories: 68
+    avg_n_steps: 30.24
+total_selected_tasks: 150
+total_selected_trajectories: 211

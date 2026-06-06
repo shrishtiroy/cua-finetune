@@ -1,0 +1,151 @@
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,Opus,https://www.palmerak.org/community-development-pzc,,Kristian ,,4 Opus Runs,gb-ak-palmer-planning-zoning-t04-workflow-requirements,"Using the Palmer Planning & Zoning site, Outline the steps and prerequisite approvals needed to obtain a demolition permit for a residential structure.",,,"All 4 runs failed to
+1. find actual demolition permit procedures despite
+  extensive navigation (12-13 unique pages per run,
+  ~203 steps each).
+  2. Fabrication Behavior Exposed: The agent
+  acknowledged it couldn't find specific info, then
+  provided generic ""typical municipal"" processes as
+  if they were site-derived. This is flagged as a
+  valuable failure mode to detect.
+  3. High Cross-Run Divergence: Despite identical
+  starting conditions:
+    - Runs 1, 2, 4: Fabricated generic 9-step
+  processes
+    - Run 3: Navigated to external ICC Building Code
+  site and cited IBC 2015 Section 3303 (different
+  approach)
+  4. Information Absence Signal: The Palmer site may
+  genuinely lack explicit demolition permit
+  documentation. The agent found only 2 mentions of
+  ""demolition"" in municipal code (both in Title 17.68
+   Nonconforming Uses).
+
+Cons: 
+• doesn't look like this info is on the site",,,,,"This task is good IF there's actually info on the site around how to do this. We literally need to call the city to verify. IBC 2015 Section 3303 is arguably correct information on the iccsafe.org website, but I'm not 100% sure, and I don't know what our policy should be on the agent leaving the site to check iccsafe. ",,,,,,,
+,Opus,https://www.cityofimperial.org/community-development-department,,Kristian ,,4 Opus Runs,gb-ca-city-of-imperial-community-development-t03-workflow-requirements,"Using the City of Imperial Community Development site, Find the process flow for scheduling and completing required inspections during a residential remodel project.",https://www.cityofimperial.org/sites/default/files/2024-IMP-INSPECTION-REQUESTS.pdf,,"Pros: 
+1. ""The City of Imperial Community Development
+  website search for 'permit process' and 'building
+  inspection process' has yielded no results.""
+  3. Information Absence: The site mentions
+  capability (""schedule inspections online through
+  Citizenserve portal"") but doesn't document the
+  actual workflow steps.
+  4. High Content Divergence: Outputs ranged from:
+    - Citizenserve portal overview (generic)
+    - Generic inspection lists (1-11 items)
+    - Acknowledged navigation failures
+
+Cons: 
+Again, content might not exist",,,,,agent opens inspections.pdf twice even after observing that there is no relevant info within the pdf.,,,,,,,
+,Opus,https://piatt.gov/,,Kristian ,,4 Opus Runs,gb-il-piatt-county-il-t03-workflow-requirements,"Using the Piatt County, IL site, Find the process flow for scheduling and completing required inspections during a residential remodel project.",,,"All runs agree on: Zoning Officer contact (Keri Nusbaum), fee structure ($12/100 sqft), permit validity (2 years), absence of inspection checklist
+  - Structural variance: Step organization differs but same underlying facts
+  - Phone number variance: 217-762-3111 vs 217-762-9487 ext. 108 vs ext. 5",,,,,,,,,,,,
+,Opus,https://www.cityofimperial.org/community-development-department,,Kristian ,,5 Opus Runs,gb-ca-city-of-imperial-community-development-t01-workflow-requirements,"Using the City of Imperial Community Development site, Identify the complete sequence of steps required to obtain a building permit for a new single-family home construction, from initial application to final certificate of occupancy.",,,"1. High Variance: 5 runs produced 5 different
+  answers with varying specificity
+  2. Wildly Different Outputs:
+    - Run 05-23-12 (HIGH specificity): Found Citizenserve portal details, specific address
+    - Run 05-50-13 (LOW specificity): ""While the complete detailed sequence of steps isn't fully visible... based on typical City of Imperial building permit procedures""
+  3. Navigation Barriers: 404 errors from URL guessing (e.g., /community-development vs correct
+/community-development-department); CAPTCHAs triggered during Google search fallbacks
+  4. Distributed Information Architecture: Key permit info is spread across:
+    - Main site pages
+    - PDFs (Building Application, etc.)
+    - External Citizenserve portal
+  (citizenserve.com/Imperial)",,,,,,,,,,,,
+,Opus,https://www.cityofimperial.org/community-development-department,,Kristian ,,4 Opus Runs,gb-ca-city-of-imperial-community-development-t02-workflow-requirements,"Using the City of Imperial Community Development site, Determine what documentation and prerequisites must be submitted before a residential addition permit application will be accepted for review.",https://docs.google.com/document/d/14OPCvytwCBJx3Bu_oq0V3EJJmGiRdCQDYZVTHVntKfw/edit?usp=sharing,,"It passes sometimes, can't find the form other times. It's in the PDF on the building forms section of the /building-safety page.",,,,,,,,,,,,
+,Opus,https://beauparish.org/,,Kristian ,,4 Opus Runs,gb-la-beauregard-parish-police-jury-t03-workflow-requirements,"Using the Beauregard Parish Police Jury site, Find the process flow for scheduling and completing required inspections during a residential remodel project.",,,"Fabrication Risk Identified! It answers the question generally correctly, but may likely be making some incorrect or even fabricated references.
+
+Run 3 provided explicit inspection types:
+  ▎ ""Under the IRC, the typical inspections required for a
+  residential remodel include: 1. Foundation/Slab Inspection,
+   2. Framing Inspection, 3. Electrical Rough-In, 4. Plumbing
+   Rough-In, 5. Mechanical Rough-In, 6. Insulation
+  Inspection, 7. Final Inspection""
+
+  Problem: This is an INFERENCE from IRC general knowledge,
+  NOT extracted from Beauregard Parish documentation. The
+  ordinance says inspections are ""determined by ICC codes""
+  but does not enumerate them.",,,,,,,,,,,,
+,Opus,https://www.newcastlede.gov/2503/Permits-Inspections,,Kristian ,40%,,gb-de-new-castle-county-permits-inspections-t01-workflow-requirements-with-fees,"Using the New Castle County Permits & Inspections site, Identify the complete sequence of steps required to obtain a building permit for a new single-family home construction, from initial application to final certificate of occupancy. Include all applicable fees and their amounts.","35: End-to-End Sequence Synthesis. The response must successfully capture the macro-level sequence of the permit lifecycle, proving the model synthesized the disparate guides on the county site. Required Elements:
+
+• Application Phase: Must mention utilizing the county's digital portals (eApply, ePlans, or eServices) to initiate the permit and upload documents.
+• Construction/Inspection Phase: Must mention that once the permit is issued, construction begins and a sequence of mandatory inspections must be scheduled and passed.
+• Completion Phase: Must mention that passing the final inspection AND submitting final documents results in the issuance of the Certificate of Occupancy (CO).
+
+
+35: Pre-Application & Upload Requirements. The response must describe the permit workflow and include at least three of the core steps listed below, in any order. The agent has flexibility in how much detail it provides for each item, but its description must not contradict the clarifications shown in parentheses.
+
+• Building Contractor License with Home Warranty Approval OR, if the owner-occupier is acting as their own contractor, the Owner-Occupier Affidavit and Owner-Occupier Warranty Exemption Form.
+. Building Plans (MEP drawings are not required)
+. Transfer Tax Forms (may mention State RTT-BPA and/or NCC Transfer Tax)
+. Lines and Grades Plan (may mention ""Lines and Grades"" or ""L&G Plan""; generic ""site plan"" acceptable when summarizing at a high level, provided description doesn't conflict with L&G requirements); 
+. Energy Code Compliance form (REScheck or REM/Rate)
+• Outside Agency Approvals (may mention DelDOT Entrance permit/approval required prior to issuance, DNREC Well/Septic, or Public Works Sewer Agreement).
+
+""Fees. The response must include all fees from NCC's published schedule: Building Permit ($12/$1,000 valuation, min $60; $5.25/$1,000 over $1M), Certificate of Occupancy ($60 flat), Zoning Permit (10% of Building Permit Fee, $21 min/$145 max), NCC Volunteer Fire Assistance Fund (0.5% of valuation, first $1M only), Engineering Fee ($65/review if Floodplain/Wetland or L&G review required), Sewer Fees (variable, if applicable), Impact Fees (variable, may apply). Deduct all 20 points if: 1.) Response fabricates fees not in this schedule (e.g., \""$15 Technology Fee\""); OR 2.) Response cites a document incorrectly associated with the fees on the county website. The following documents contain fee information: - https://www.newcastlede.gov/205/Single-Family-Dwelling & https://www.newcastlede.gov/DocumentCenter/View/33001/Single-Family-Dwelling-Building-Permit-Requirements: Building Permit Requirements for SFD; lists Building Permit Fee, COO, Zoning, Fire Fund, Sewer, Impact, and Engineering fees - https://www.newcastlede.gov/DocumentCenter/View/53391/Chapter-Six-01012026-unofficial-CodeOnly-web (Chapter 6 Building Code): Official comprehensive Schedule of Permit and Review Fees; confirms baseline rates, minimums, maximums, and $5.25/$1,000 rate over $1M - https://www.newcastlede.gov/DocumentCenter/View/32992/Non-Residential-BuildingAddition-Permit-Requirements (Non-Residential Building/Addition): Same fee schedule structure and calculations for non-residential - https://www.newcastlede.gov/DocumentCenter/View/32995/Deck-Permit-Requirements & https://www.newcastlede.gov/DocumentCenter/View/15475/Deck-Permit-Packet (Residential Deck): Same fee structure but with $142 minimum building permit fee for decks""
+
+10: Licensing & Insurance Nuance. If response mentions Worker's Compensation, General Liability Insurance, or Delaware Business License, the framing must be accurate. Correct framings: 1.) Contractor path — these are prerequisites for obtaining the Contractor License, which is then submitted with the permit application; 2.) Owner-Occupier path — these documents are not required; owner-occupiers submit an Affidavit + Warranty Exemption Form instead of a contractor license. Deduct all 10 points if response lists these as direct permit submission documents without proper context. If response doesn't mention these documents at all, full points are awarded. Response must not overstate the architect/engineer seal requirement for building plans. Correct framing: states seal ""may be required"" or uses conditional language, or omits the seal requirement when summarizing at a high level. Deduct all 10 points if: 1.) Response states architect/engineer signature/seal IS required, IS mandatory, or MUST be included; OR 2.) Response provides reasoning for the seal requirement that is not grounded in NCC Code Sec. 6.03.013 (which states the Code Official may accept non-professional documents for Group R-3/single-family dwellings). Fabricated explanations (e.g., ""required for structural safety,"" ""depends on square footage,"" or other rationale not in the code) indicate the agent did not access the correct source material.
+",,,,,,,,,,,,,,
+,,Opus,https://pair.withgoogle.com/explorables/fill-in-the-blank/, ,Colin,,,https://taiga.ant.dev/problems/view?problemId=bert-fill-in-blank-narnia-gotham-differences&referrer=environment&environmentId=1b3149fd-3117-4df8-854a-1ee429b48cb7&problemVersionId=6022fa36-9bab-4c42-b1df-b927be888ccb,https://trajectories.sh/t/77644994-783e-403b-8f75-83b874e77531,bert-fill-in-blank-narnia-gotham-likelihoods,"On this page there is a scatter plot with a Narnia sentence and a Gotham sentence. Set the number of tokens to 'All' so every token is visible, and make sure you are viewing 'Likelihoods'. Then answer these two questions: (1) Which token has the highest likelihood for the Narnia sentence while also being more likely for Narnia than for Gotham? (2) Which token has the highest likelihood for the Gotham sentence while also being more likely for Gotham than for Narnia?
+",,,,,,,,Shrishti: prompt/verifier is wrong. the answer to all the questions should be house. 2) says switch to likelihoods but verifier provides answer for differences. i think we should stick with likelihoods and house since it is very difficult to tell. the most tricky one is castle vs house or most likely in narnia (i literally had to use screenshot box tool to see which word was higher) and furthest right is also house whether it is likelihoods/differences. Also I don't think we need to specify that highest likelihood for narnia is the furthest up the y-axis the agent should be able to figure that out on its own. ,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,Passes on Nibbles,,,,,,,,,,,,,,,,,,,,
+,Other,,Opus,https://www.theguardian.com/politics/2016/may/06/holyrood-elections-see-rise-of-team-ruth-and-demise-of-labour-vision,Kristian,Colin,,100%,33%,"❌ Trajectory 1 – Agent wastes time reward hacking, dumb
+⚠️ Trajectory 2 – technically got it right, added extra info
+✅ Trajectory 3 – got it right",difference_between_kirkcaldy_and_paisley,"Using the provided Guardian page on the 2016 Holyrood election results, report the SNP's vote share in Kirkcaldy and in Paisley, then compute the difference between them. State vote share percentages exactly as shown in the article. Do not provide any additional information.","100: Response contains the three required values: Kirkcaldy: 52.6%, Paisley: 49.8%, Difference: 2.8%. Response does not reference any additional constituencies or differing metrics.",,,,,,Timeout,"New Comments:
+
+Re Capcha
+Blocks a great many runs from occuring
+
+Verification
+Should use deterministic verifier. 
+
+Economic Relevance
+We should make a variant of this honestly transcribing ALL of the items in the visualgraphic. That would make it more difficult, and more economically relevant ( the economic value of this is associated with identifying discrepencies in journalistic reporting. that would more often be surfaced via a full article or full event analysis, not looking up these 1-2 specific metrics )
+
+Anti-Cheat
+Any frontier model (Claude, GPT-4, Gemini) almost certainly has these exact percentages memorized. The agent can ""cheat"" by simply recalling the answer without visiting any website. Even if the TB community was pro-CUA, this would not pass unless we verified there were one or multiple data descrepencies in this article that have never been reported by the broader internet. 
+
+Rigor
+Would be better if it was logically more rigerous, but I still feel like this flavor of task is rigerous. 
+
+Old Comments: 
+
+1. percentages not explicit enough around what they're refering to (what the election is for, year of the election, etc.) 2. perhaps make more search resistant by asking about specifically the gaurdian's reporting on the vote
+
+My main concern is the error is around timeout, which is the easiest fail to induce.
+
+Additional concern: will these infographics archive?",,What's the difference between Kirkcaldy and Paisley in the percentage of votes for the SNP party? State the exact percentages.,"100: 'States the percentages and the difference: Paisley: 49.8%, Kirkcaldy: 52.6%. Difference: 2.8%'"
+,Other,,Opus,https://www.theguardian.com/sport/ng-interactive/2016/aug/08/how-katie-ledecky-obliterated-her-own-world-record-in-the-400m-freestyle,Kristian,Colin,,100%,66%,"✅ Opus Trace 1 – Finds button, 28 steps 
+✅ Opus Trace 2 – Finds button, 94 steps
+❌ Opus Trace 3 – Cannot find button 102 steps, reward hacking attempts
+
+Sonnet: https://www.trajectories.sh/t/a86662d0-68a3-4236-bda3-d0a94838c2ce/viewer",last_to_100m,"In this Guardian article 'How Katie Ledecky obliterated her own world record in the 400m freestyle', which swimmer was reported to have reached the 100m mark last? Give only their last name and exact time, no additional information.",50: 'States that the athlete reached the 100m mark last with a time of 59.74 seconds 50: states that the last name of the athlete that was reported to have reached the 100m mark last was Cook',,,,,,"Timeout, 
+Doesn't see button to show stats (happens on succeeding traces as well)","** Current Feedback **
+1. Why aren't we using a deterministic verifier? it should just output a json that we validate through a function call
+2. Is the solution 'memorizable', as opposed to something that requires critical thinking / reasoning? Perhaps this could be an explanation for using an LLM as a judge, at least with respect to awarding partial credit.
+3. QUESTION: what is 'gaurenteed' content-wise in agent reasoning messages? Like if it sees and clicks a button, is it gaurenteed to report on the associated action? If so, LLM as a judge could award partial credit for finding the button and clicking on it.
+
+
+** Old Feedback **
+
+1. really cool task. 2. needs to be run on opus pass@5 3. verifier currently expects more information than requested. 4. verifier logic is akin to contains(), which means the agent can hallucinate a lot of stuff and essentially not get docked. 5. run fairness rubrics. 6. bonus to change wording to be more web search resillient (i.e. 'according to the Gaurdian's report on olympic event X on date Y, who was last to reach the Z marker')
+
+My main concern is the error is around timeout, which is the easiest fail to induce. On Opus, timeout currently comes from stalling trying to reward hack using the inspector. Is this good / useful type of failure? will the failure still exist if we prevent reward hacking?
+
+Additional concern: will these infographics archive?",,"According to the Gaurdian's reporting on the women's 400m freestyle final in the 2016 Rio Olympics, who reached the 100m mark last? List the exact time and the last name of the athlete. Do not provide any additional information in your answer.
+
+",100: 'States that the athlete reached the 100m mark last with a time of 59.74 seconds and the last name of the athlete is Cook'
+,Structured Information from Sheets or Docs with Complex Formatting,,Opus,https://peoplemov.in/,Shrishti,Colin,,100%?,"Nibbles Link
+Opus Link",peoplemovin-sort-migrants-high-range,"Using the data on this site, look up the number of migrants for each of the following country pairs (from → to). Sort them from fewest to most migrants and return the count for each:\n- Czech Republic to Switzerland\n- Indonesia to Germany\n- Spain to Ireland","33: Spain to Ireland is correctly identified as the shortest distance with a value of 10,181
+33: Czech Republic to Switzerland is correctly identified as the middle distance with a value of 16,113
+33: Indonesia to Germany is correctly identified as the longest distance with a value of 18,441",click on each origin country and hover over the flow line to the destination country to see the number of migrants.,,,,,,Shrishti: timeout error: agent never gets the key functionality of hovering over the flow lines to see the migrant data. it spends a lot of time going from indonesia and locating germany in itself.,,,,
+,Structured Information from Sheets or Docs with Complex Formatting,,Opus,https://peoplemov.in/,Kristian,Colin,,100,"Opus Traces: Trace 1, Trace 2, Trace 3",,top_migrant_destination_barbados,"Using peoplemov.in, report Barbados's top emigrant destination and the percentage of its emigrants who went there. State nothing else.","100: States United States (or USA/U.S./America) AND 55.30% (or 55.3%). May optionally include the nominal migrant count associated with this metric 56,640 people, but if it provides a differing nominal metric no points are rewarded at all.",,,,,,,"1. Just make verifier a little more explicit. 2. perhaps include clause it's ok to list the nominal amount of migrants as well, albeit it's already explicitly requested that the percentages be reported. 3. I'm worried about the economic relevance of this task, as this information can be ascertained on other sites. I suppose this is a concern we could have about a lot of opus failing web tasks though, so I'm easing up on this. 4. I like that barbados is initially hidden and you have to click through the GUI before it shows up. 
+
+Does it archive
+
+Chris: I re-ran this one and now it gets 100% pass @ 5? https://www.trajectories.sh/t/63619eef-9fd6-4640-8aaf-17822509b82b ",,,
+,Navigating Multiple Government Sites and Using Government Portals,,Opus,https://www.sec.gov/,Colin,Erik,100%,100%,https://trajectories.sh/t/6f164694-1f59-4366-a504-5c845efcdafa,,,Using the SEC EDGAR filing page for Portillo's Inc. how Berkshire Partners' beneficial ownership changed from IPO to mid-2025. How many total shares did Berkshire beneficially own at IPO? What percentage was that?  How many shares do they own as of the August 2025 filing? What percentage is that?,- r: Berkshire Partners beneficially owned ~45 million shares at IPO. That represented ~63.73% of outstanding Class A common stock.,,,,,,couldn't get to answer,,,,

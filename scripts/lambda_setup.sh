@@ -61,6 +61,20 @@ pip install --no-cache-dir flash-attn==2.7.0.post2 --no-build-isolation || {
 pip install --no-cache-dir "ms-swift[llm]==4.0.*" deepspeed==0.16.* tensorboard
 pip install --no-cache-dir -e .
 
+# Per-model VLM helpers that ms-swift checks for at load time but does NOT pull
+# in via [llm] extras. Installing all four upfront so any of the configs can
+# run without re-bootstrapping.
+#   qwen_vl_utils       — Qwen3-VL  (smart_resize, image preprocessing)
+#   timm                — Llama-3.2-Vision aligner
+#   einops              — Kimi-VL-A3B
+#   deepseek_vl2        — DeepSeek-VL2-Small (custom processor)
+pip install --no-cache-dir \
+  "qwen_vl_utils>=0.0.14" \
+  "timm>=1.0.11" \
+  "einops>=0.8.0" \
+  "deepseek_vl2 @ git+https://github.com/deepseek-ai/DeepSeek-VL2.git@main" \
+  || echo "WARN: one or more VLM helper installs failed; per-model errors will surface at swift sft time."
+
 # ---- 4. re-pull trajectories from Supabase ---------------------------------
 echo
 echo "Re-pulling trajectories from Supabase (cached, idempotent)..."

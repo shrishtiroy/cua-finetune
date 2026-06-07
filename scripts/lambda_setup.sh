@@ -46,15 +46,17 @@ source .venv/bin/activate
 pip install --upgrade pip wheel setuptools
 
 # ---- 2. torch + flash-attn (CUDA 12.4 base) ---------------------------------
-# Lambda Stack ships with CUDA 12.4 + python 3.11. Pin torch to a known-good
-# combo for ms-swift v4.x.
+# Lambda Stack ships with CUDA 12.4 + python 3.10/3.11. ms-swift 4.0.4 imports
+# torch.distributed.fsdp.FSDPModule (added in torch 2.6), so torch must be >=2.6.
 pip install --no-cache-dir \
-  "torch==2.5.1" "torchvision==0.20.1" "torchaudio==2.5.1" \
+  "torch==2.6.0" "torchvision==0.21.0" "torchaudio==2.6.0" \
   --index-url https://download.pytorch.org/whl/cu124
 
-# flash-attn — pre-built wheel for cu124/torch 2.5
-pip install --no-cache-dir flash-attn==2.7.0.post2 --no-build-isolation || {
-  echo "flash-attn install failed; ms-swift will fall back to sdpa (slower but works)."
+# flash-attn pre-built wheel for cu124/torch 2.6/py310. Falls back to
+# from-source build (~5-15 min) if no matching wheel exists.
+pip install --no-cache-dir flash-attn==2.7.4.post1 --no-build-isolation || {
+  echo "WARN: flash-attn install failed. Either build from source manually OR"
+  echo "      change attn_impl: flash_attn -> sdpa in your model config (~15-20% slower)."
 }
 
 # ---- 3. ms-swift + project deps --------------------------------------------

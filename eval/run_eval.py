@@ -44,9 +44,16 @@ TASK_DIRS = [
 
 
 def _flatten_held_out(payload: dict[str, Any]) -> list[tuple[str, str]]:
-    """Return [(category, task_name), ...]."""
+    """Return [(category, task_name), ...].
+
+    Accepts either ``held_out_per_category: {cat: [tasks]}`` (the format that
+    ``atif_to_swift.py`` writes) or ``held_out: {cat: [tasks]}`` /
+    ``held_out: [tasks]`` (legacy flat formats).
+    """
     out: list[tuple[str, str]] = []
-    held = payload.get("held_out") if isinstance(payload, dict) else None
+    if not isinstance(payload, dict):
+        return out
+    held = payload.get("held_out_per_category") or payload.get("held_out")
     if isinstance(held, dict):
         for cat, tasks in held.items():
             for t in tasks or []:

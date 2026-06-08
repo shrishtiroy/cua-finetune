@@ -24,6 +24,29 @@ MODEL="${1:?MODEL required}"
 ADAPTER_PATH="${2:-}"
 PORT="${3:-8000}"
 
+# Preflight: confirm vllm is on PATH inside the active venv. ms-swift's [llm]
+# extras *may or may not* pull in vllm depending on version, so we don't rely
+# on it. Install on-demand instead of failing later inside the model load.
+# Note: vllm has its own torch pinning. Recent vllm (>= 0.7) wants torch 2.6,
+# matching what lambda_setup.sh installs. If the install changes torch, the
+# warning is loud — we don't try to be clever about reverting it.
+if ! command -v vllm >/dev/null 2>&1; then
+  echo "vllm CLI not found in PATH. Installing into the active venv..."
+  pip install --no-cache-dir "vllm>=0.7.0" || {
+    echo "ERROR: vllm install failed. Possible causes:" >&2
+    echo "       1. torch version mismatch (vllm wants torch 2.6, lambda_setup pins 2.6 — should be fine)" >&2
+    echo "       2. CUDA version mismatch (vllm wheels are cuda 12.4 — Lambda Stack is 12.4 — fine)" >&2
+    echo "       3. Out of disk in /tmp during build (re-run after: df -h)" >&2
+    echo "       Try: pip install vllm  (no version pin)" >&2
+    exit 2
+  }
+fi
+
+# Some Lambda images set HF_HOME under a small partition. Be explicit and put
+# the 17-GB Qwen3-VL-8B (and friends) under the user home where there's space.
+export HF_HOME="${HF_HOME:-${HOME}/.cache/huggingface}"
+mkdir -p "${HF_HOME}"
+
 EXTRA_ARGS=()
 case "$MODEL" in
   *Kimi-VL*|*deepseek-vl2*)

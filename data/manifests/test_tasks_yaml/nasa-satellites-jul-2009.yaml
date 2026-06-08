@@ -1,0 +1,20 @@
+name: nasa-satellites-jul-2009
+url: https://eyes.nasa.gov/apps/solar-system
+prompt: 'Go to eyes.nasa.gov/apps/solar-system and set the date to July 2009. Count
+  the number of satellites during July 2009 and list them. Only count satellites that
+  are further from the Earth than the Moon is and no satellites that orbit other planets.
+
+  '
+rubric:
+- r: 'Lists the satellites active in July 2009 that are beyond the Moon''s orbit:
+    Dawn, STEREO Ahead, STEREO Behind, MESSENGER, Kepler, Stardust, Spitzer Space
+    Telescope, Deep Impact, Rosetta, New Horizons, Voyager 1, Voyager 2, Pioneer 10,
+    Pioneer 11, SOHO, ACE, and LCROSS.
+
+    '
+  w: 80
+- r: 'States that there are 17 satellites total.
+
+    '
+  w: 20
+archives: []

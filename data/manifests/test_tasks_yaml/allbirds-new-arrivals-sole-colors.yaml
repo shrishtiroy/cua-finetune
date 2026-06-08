@@ -1,0 +1,10 @@
+name: allbirds-new-arrivals-sole-colors
+url: https://www.allbirds.com/
+prompt: Between all of the shoes in the new arrivals on the home page, how many different
+  soles are there, and list them all.
+rubric:
+- r: States there are 4 different soles (Warm White, Parchment, Blizzard, Natural
+    White).
+  w: 100
+archives:
+- allbirds

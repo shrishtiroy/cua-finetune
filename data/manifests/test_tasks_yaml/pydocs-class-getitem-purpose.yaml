@@ -1,0 +1,16 @@
+name: pydocs-class-getitem-purpose
+url: https://docs.python.org/3/reference/datamodel.html
+prompt: 'On the Python docs Data Model page, find the documentation for the __class_getitem__
+  special method. According to the docs, what is its purpose, and does it need to
+  be decorated with @classmethod when defined on a class?
+
+  '
+rubric:
+- r: Must state that its purpose is to allow runtime parameterization of standard-library
+    generic classes or similar.
+  w: 50
+- r: Must state that it does not need to be decorated with @classmethod because it
+    is automatically a class method when defined on a class.
+  w: 50
+archives:
+- docs-python-org

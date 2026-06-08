@@ -1,0 +1,11 @@
+name: task_e108
+url: https://docs.python.org/3
+prompt: In the Python copy module documentation, locate the section that explains
+  how the deepcopy() function avoids problems with deep copy operations. Within the
+  list of techniques used by deepcopy(), identify and report the data structure that
+  is used to keep track of objects that have already been copied.
+rubric:
+- r: 'States: memo dictionary'
+  w: 100
+archives:
+- docs-python-org-

@@ -1,0 +1,30 @@
+name: karthikeya-box-laser-cut-dimensions-vs-screen-count
+url: https://karthikeyags.myportfolio.com/screens-of-august-tangible-dataviz
+prompt: 'On the "Screens of August" page, scroll to section 6 ("Build & Assembly").
+  Part One describes "The Box" — a laser-cut acrylic box. The description states the
+  box dimensions. Below the box description is a laser-cut layout diagram showing
+  the box panels with etched text. Zoom into this diagram and read the etched text
+  visible on the two side panels (the tall panels with text). One panel shows "Total
+  Screen Time: 2432 mins" and the other shows "Total Screen Time: 1713 mins." But
+  the "Other Insights" section earlier in the page states different numbers for Annual
+  Break and College Days screen time. What were the numbers shown in the insights
+  cards? Do the numbers on the box panels match the insight cards, or is there a discrepancy?
+  Also, how many slots does the box have to hold acrylic screen cards — does this
+  match the number of days in August being tracked (Aug 2-31)?
+
+  '
+rubric:
+- r: 'Reads the box panel text: one side says "Total Screen Time: 2432 mins" for Vacation
+    Days, the other says "Total Screen Time: 1713 mins" for College Days. The insight
+    cards state 2427 mins for Annual Break and 1713 mins for College Days. There is
+    a small discrepancy: 2432 vs 2427 for the break period.
+
+    '
+  w: 50
+- r: 'States the box dimensions are 5 x 14 x 6 inches. The box should have 30 slots
+    (for Aug 2 through Aug 31 = 30 days of data), which can be verified by counting
+    the slot marks in the laser-cut diagram.
+
+    '
+  w: 50
+archives: []

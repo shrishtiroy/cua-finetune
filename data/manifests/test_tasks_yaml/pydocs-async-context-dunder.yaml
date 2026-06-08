@@ -1,0 +1,16 @@
+name: pydocs-async-context-dunder
+url: https://docs.python.org/3/reference/datamodel.html
+prompt: 'On the Python docs Data Model reference page, find the section on Asynchronous
+  Context Managers near the bottom of the page. What two special methods must an asynchronous
+  context manager define, and what is the key difference between these methods and
+  their synchronous counterparts (__enter__ and __exit__)?
+
+  '
+rubric:
+- r: Must name __aenter__ and __aexit__ as the two required methods.
+  w: 50
+- r: Must state that the key difference is they must return an awaitable (unlike their
+    synchronous counterparts).
+  w: 50
+archives:
+- docs-python-org

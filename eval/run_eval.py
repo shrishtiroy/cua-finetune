@@ -51,6 +51,10 @@ TASK_DIRS = [
     REPO_ROOT.parent / "qa-cua-bench" / "tasks",
     # YAMLs synthesized from CortexBench/Liveweb CSVs (see data/csv_to_yaml.py).
     REPO_ROOT / "data" / "manifests" / "synthesized_tasks",
+    # Vendored copies of test-task YAMLs (see data/vendor_test_yamls.py).
+    # Lets the eval driver work on machines that don't have all sibling repos
+    # cloned (e.g. Lambda only has Dillinger).
+    REPO_ROOT / "data" / "manifests" / "test_tasks_yaml",
 ]
 
 

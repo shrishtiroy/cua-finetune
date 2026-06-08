@@ -1,0 +1,8 @@
+name: reuters-insect-arachnid-assessed-pct
+url: https://www.reuters.com/graphics/GLOBAL-ENVIRONMENT/INSECT-APOCALYPSE/egpbykdxjvq/
+prompt: What percent of arachnids have been assessed?
+rubric:
+- r: States approximately 0.3987% (441 assessed out of 110,615 total arachnid species).
+  w: 100
+archives:
+- reuters-insect-apocalypse

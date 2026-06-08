@@ -1,0 +1,10 @@
+name: task_e46
+url: https://docs.python.org/3
+prompt: In the Python AST documentation's abstract grammar section, locate the definition
+  for the Interpolation expression type and report its exact field structure, including
+  all field names, their types, and any optional indicators.
+rubric:
+- r: 'States: Interpolation(expr value, constant str, int conversion, expr? format_spec)'
+  w: 100
+archives:
+- docs-python-org-

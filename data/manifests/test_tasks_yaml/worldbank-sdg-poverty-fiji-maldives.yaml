@@ -1,0 +1,8 @@
+name: worldbank-sdg-poverty-fiji-maldives
+url: https://datatopics.worldbank.org/sdgatlas/
+prompt: According to the Harmonized national poverty lines circa 2017, what is the
+  difference in average USD made per day in Fiji and the Maldives?
+rubric:
+- r: States the difference is 1.33 USD per day.
+  w: 100
+archives: []

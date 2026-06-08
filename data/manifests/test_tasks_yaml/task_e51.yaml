@@ -1,0 +1,12 @@
+name: task_e51
+url: https://docs.python.org/3
+prompt: In the Python documentation section on assignment statements, find the explanation
+  of how starred target unpacking handles the remaining items from an iterable. Specifically,
+  describe what data structure collects these remaining items and what state that
+  structure can be in when there are no remaining items.
+rubric:
+- r: 'States: A list of the remaining items in the iterable is then assigned to the
+    starred target (the list can be empty).'
+  w: 100
+archives:
+- docs-python-org-

@@ -1,0 +1,33 @@
+name: worldshapin-russia-shape-explosion-1995
+url: https://worldshap.in/#/90/RU/
+prompt: 'On worldshap.in, add Russia and set the timeline to 1990. Observe Russia''s
+  polar chart shape — several axes appear collapsed nearly to the center point, giving
+  the shape an unusual, lopsided appearance. Now drag the timeline forward to 1995
+  and watch the shape transform. How many axes visibly jump outward (expand significantly)
+  between 1990 and 1995? Name each axis that expands. But also look carefully — does
+  any axis move in the OPPOSITE direction (shrink inward) during this same 1990-to-1995
+  transition? If so, which axis shrinks, and what are its bar chart values in 1990
+  versus 1995?
+
+  '
+rubric:
+- r: 'Identifies that 2 axes visibly jump outward from near-zero in 1995: GDP Per
+    Capita (index goes from 4 to ~57.8, value from $0 to ~$7,788) and CO₂ Per Capita
+    (index goes from 4 to ~17.6, value from 0 to ~11.4 tons). These axes were collapsed
+    because the data was missing for the USSR era before 1995.
+
+    '
+  w: 40
+- r: 'Identifies that the Life Expectancy axis moves in the opposite direction — it
+    shrinks inward between 1990 and 1995. The Life Expectancy value drops from approximately
+    68.0 years (1990, index ~70.9) to approximately 66.0 years (1995, index ~67.1).
+
+    '
+  w: 40
+- r: 'Notes that the Expected Years of School axis also shrinks slightly from 1990
+    to 1995 (index drops from ~67.3 to ~62.5, value from 12.5 to 11.7 years), contributing
+    to the shape change in a way that partially offsets the expansion on other axes.
+
+    '
+  w: 20
+archives: []

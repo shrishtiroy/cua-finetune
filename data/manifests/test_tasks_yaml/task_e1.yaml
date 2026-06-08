@@ -1,0 +1,11 @@
+name: task_e1
+url: https://docs.python.org/3/
+prompt: On the Python library introduction page, find the platform availability notes
+  section. Locate the example that specifies combined minimum version requirements
+  for a Linux distribution and its C library. Report both version numbers in the format
+  they appear.
+rubric:
+- r: 'States: Linux >= 3.17 with glibc >= 2.27'
+  w: 100
+archives:
+- docs-python-org

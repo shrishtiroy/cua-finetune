@@ -1,0 +1,9 @@
+name: task_e47
+url: https://docs.python.org/3
+prompt: In the Python AST documentation's abstract grammar section, find the definition
+  of TemplateStr and report its signature showing the name and parameter specification.
+rubric:
+- r: 'States: TemplateStr(expr* values)'
+  w: 100
+archives:
+- docs-python-org-

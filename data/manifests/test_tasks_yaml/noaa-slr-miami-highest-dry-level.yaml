@@ -1,0 +1,15 @@
+name: noaa-slr-miami-highest-dry-level
+url: https://coast.noaa.gov/slr/
+prompt: 'I''m going to be at the Vizcaya Museum and Gardens in Miami. According to
+  the NOAA Coast website, what is the highest water level (in feet) at which no water
+  appears at the venue? If you add 6 feet to that water level, do the stairs get fully
+  covered?
+
+  '
+rubric:
+- r: 'States the highest water level with no water is 3.5 feet, and that at 9.5 feet
+    (3.5 + 6) the stairs are NOT fully covered.
+
+    '
+  w: 100
+archives: []

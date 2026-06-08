@@ -1,0 +1,27 @@
+name: thatsedu-social-contribution-dominance
+url: https://makinguse.com/thatsedu/
+prompt: 'Go to makinguse.com/thatsedu/ and view the Society perspective for Men. With
+  all categories enabled, look at the benefit bubbles on the right side. For most
+  countries the Income tax effect (one color) is the largest benefit bubble. But there
+  is exactly one country among the 30 where the Social contribution effect bubble
+  is visually LARGER than its Income tax effect bubble. Identify that country. Then
+  confirm your visual observation by clicking on that country and checking the actual
+  dollar values for both Social contribution effect and Income tax effect. Report
+  the country name and both dollar values. Once you have your final answer, use the
+  answer tool to submit it.
+
+  '
+rubric:
+- r: 'Must identify Poland as the only country where Social contribution effect ($78,804)
+    exceeds Income tax effect ($53,177) in the Society/Men view.
+
+    '
+  w: 70
+- r: 'Must report both values approximately correctly: Social contribution effect
+    ~$78,804 and Income tax effect ~$53,177 for Poland. The agent must have verified
+    the visual bubble observation with actual data values from the info panel.
+
+    '
+  w: 30
+archives:
+- thatsedu

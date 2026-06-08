@@ -1,0 +1,11 @@
+name: task_e66
+url: https://docs.python.org/3
+prompt: In the Python language reference documentation on top-level components, locate
+  Section 9.3 which covers interactive input. Find the note that appears after the
+  grammar definition in that section, and report what requirement is specified regarding
+  compound statements in interactive mode.
+rubric:
+- r: 'States: a (top-level) compound statement must be followed by a blank line'
+  w: 100
+archives:
+- docs-python-org-

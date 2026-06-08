@@ -1,0 +1,11 @@
+name: portillos-just-moved-west-coast-im
+url: https://duckduckgo.com/
+prompt: 'I just moved to the West Coast and I''m planning a road trip to find a taste
+  of home. Using the Portillo''s website to help, which Portillo''s location is the
+  furthest west?
+
+  '
+rubric:
+- r: Identifies Portillo's Buena Park
+  w: 100
+archives: []

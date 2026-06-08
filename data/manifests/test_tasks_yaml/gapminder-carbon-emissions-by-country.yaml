@@ -1,0 +1,15 @@
+name: gapminder-carbon-emissions-by-country
+url: https://www.gapminder.org/tools/#$chart-type=bubbles&url=v2
+prompt: 'Navigate to the Gapminder tool that would best help answer the following
+  query. Consider USA, Russia, China, and Nigeria. After 1920, which of the other
+  3 countries came closest to the USA in carbon emissions in tons per capita? In which
+  year, or years, did this smallest difference occur?
+
+  '
+rubric:
+- r: Identifies that Russia came closest to the USA in carbon emissions in tons per
+    capita after 1920. Identifies that the smallest difference occurred in 1986 and
+    1987.
+  w: 100
+archives:
+- gapminder

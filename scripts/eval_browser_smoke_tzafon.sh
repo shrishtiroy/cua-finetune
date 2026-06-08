@@ -16,13 +16,21 @@
 #
 # Pre-reqs:
 #   - lambda_browser_setup.sh has been run
-#   - ~/Dillinger/.env has TZAFON_API_KEY + LITELLM_API_KEY + ANTHROPIC_API_KEY
+#   - ~/Dillinger/.env has at minimum LITELLM_API_KEY + ANTHROPIC_API_KEY (grader)
+#   - For Tzafon backend: TZAFON_API_KEY
+#   - For Claude backend (fallback): just ANTHROPIC_API_KEY
+#
+# Usage:
+#   scripts/eval_browser_smoke_tzafon.sh                                    # tzafon default
+#   scripts/eval_browser_smoke_tzafon.sh pydocs-os-sched-policy 1           # explicit task
+#   SMOKE_BACKEND=litellm_chat scripts/eval_browser_smoke_tzafon.sh         # use Claude
 
 set -euo pipefail
 
 DILLINGER_DIR="${HOME}/Dillinger"
 TASK_NAME="${1:-pydocs-os-sched-policy}"   # pick a held-out task, default is a pydocs task
 N_RUNS="${2:-1}"
+SMOKE_BACKEND="${SMOKE_BACKEND:-tzafon_responses}"  # or litellm_chat (Claude via LiteLLM)
 
 if [[ ! -d "${DILLINGER_DIR}" ]]; then
   echo "ERROR: ${DILLINGER_DIR} not found. Run lambda_browser_setup.sh first." >&2
@@ -32,6 +40,23 @@ if [[ ! -f "${DILLINGER_DIR}/.env" ]]; then
   echo "ERROR: ${DILLINGER_DIR}/.env missing" >&2
   exit 2
 fi
+
+# Verify the needed API key is present for the chosen smoke backend
+case "${SMOKE_BACKEND}" in
+  tzafon_responses)
+    if ! grep -qE "^TZAFON_API_KEY=.+" "${DILLINGER_DIR}/.env"; then
+      echo "ERROR: TZAFON_API_KEY missing from ${DILLINGER_DIR}/.env" >&2
+      echo "Either add it, or rerun with: SMOKE_BACKEND=litellm_chat $0 $@" >&2
+      exit 2
+    fi
+    ;;
+  litellm_chat)
+    if ! grep -qE "^ANTHROPIC_API_KEY=.+" "${DILLINGER_DIR}/.env"; then
+      echo "ERROR: ANTHROPIC_API_KEY missing from ${DILLINGER_DIR}/.env" >&2
+      exit 2
+    fi
+    ;;
+esac
 
 cd "${DILLINGER_DIR}"
 
@@ -48,12 +73,14 @@ echo "Task '${TASK_NAME}' found in ${TASK_YAML}"
 # Use the existing run_conduit.sh orchestrator. It:
 #   - builds conduit-runtime if needed
 #   - spins up the runtime container
-#   - runs `conduit run --tasks-file ... --task <name> --backend tzafon_responses`
+#   - runs `conduit run --tasks-file ... --task <name> --backend <SMOKE_BACKEND>`
 #   - tears down the container
 #
-# CONDUIT_AGENT_BACKEND=tzafon_responses uses the Tzafon Responses API as the
-# CUA brain (not us; this is just a sanity check of the rest of the pipeline).
-export CONDUIT_AGENT_BACKEND="tzafon_responses"
+# tzafon_responses uses the Tzafon Responses API as the CUA brain.
+# litellm_chat uses Claude (or whatever conduit's litellm_model config points at)
+# via LiteLLM. Either way, this is just a sanity check of the rest of the pipeline.
+export CONDUIT_AGENT_BACKEND="${SMOKE_BACKEND}"
+echo "Smoke backend: ${SMOKE_BACKEND}"
 
 bash ./run_conduit.sh -k "${N_RUNS}" "${TASK_YAML}" --task "${TASK_NAME}"
 

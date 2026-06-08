@@ -136,7 +136,10 @@ def main() -> int:
         rc = step.reasoning_content[:120].replace("\n", " ")
         print(f"Reasoning:      {rc}{'...' if len(step.reasoning_content) > 120 else ''}")
     if step.metrics:
-        print(f"Tokens:         prompt={step.metrics.prompt_tokens} completion={step.metrics.completion_tokens}")
+        # AgentStep.metrics is a dict[str, Any] populated by extract_usage_metrics().
+        pt = step.metrics.get("prompt_tokens")
+        ct = step.metrics.get("completion_tokens")
+        print(f"Tokens:         prompt={pt} completion={ct}")
     print(f"Parse failures: {backend.parse_failures}")
 
     if parsed_ok:

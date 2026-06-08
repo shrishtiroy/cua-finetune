@@ -43,6 +43,14 @@ if [[ "${LIVE_WEB}" == "1" ]]; then
   echo "Live-web mode ON (--live-web). Set CUA_LIVE_WEB=0 to use archive replay."
 fi
 
+# Per-task step cap. Conduit's default is 200 which is generous for strong CUA
+# models (Tzafon Opus, Claude Opus) but means a thrashing small VLM can burn
+# 200 steps × 24 tasks × ~5s = 6+ hours per baseline. Use 80 for the first
+# baseline pass; raise via CONDUIT_MAX_STEPS=N if you observe many tasks hitting
+# the cap (check _summary.jsonl for completion_kind="max_steps").
+export CONDUIT_MAX_STEPS="${CONDUIT_MAX_STEPS:-80}"
+echo "Per-task step cap: CONDUIT_MAX_STEPS=${CONDUIT_MAX_STEPS}"
+
 CUA_REPO="${HOME}/cua-finetune"
 RUNTIME_PORT=7777
 VLLM_PORT=8000

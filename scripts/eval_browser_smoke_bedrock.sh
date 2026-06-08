@@ -36,8 +36,9 @@ N_RUNS="${2:-1}"
 RUNTIME_PORT="${RUNTIME_PORT:-7777}"
 CONTAINER_NAME="conduit-runtime-smoke-bedrock"
 
-# Default to Claude Opus 4.5 on Bedrock.
-export CONDUIT_BEDROCK_MODEL="${CONDUIT_BEDROCK_MODEL:-global.anthropic.claude-opus-4-5}"
+# All bedrock config (CONDUIT_BEDROCK_MODEL, CONDUIT_AGENT_BACKEND,
+# AWS_*, etc.) is read from ~/Dillinger/.env — same setup the user has
+# locally. We don't override anything here.
 
 DOCKER_CMD="docker"
 if ! docker info >/dev/null 2>&1; then
@@ -59,16 +60,9 @@ if ! ${DOCKER_CMD} image inspect conduit-runtime >/dev/null 2>&1; then
   exit 2
 fi
 
-missing_keys=()
-for key in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION_NAME LITELLM_API_KEY ANTHROPIC_API_KEY; do
-  if ! grep -qE "^${key}=.+" "${DILLINGER_DIR}/.env"; then
-    missing_keys+=("${key}")
-  fi
-done
-if (( ${#missing_keys[@]} > 0 )); then
-  echo "ERROR: ${DILLINGER_DIR}/.env is missing: ${missing_keys[*]}" >&2
-  exit 2
-fi
+# Trust whatever's in the user's .env — no opinionated key checks.
+# If credentials are wrong/missing, the run will fail fast with a clear
+# AWS / Anthropic error message anyway.
 
 cd "${DILLINGER_DIR}"
 
@@ -81,11 +75,10 @@ if [[ -z "${TASK_YAML}" ]]; then
 fi
 TASK_YAML_REL="${TASK_YAML#${DILLINGER_DIR}/}"
 
-echo "    backend       : bedrock_cua"
-echo "    model         : ${CONDUIT_BEDROCK_MODEL}"
 echo "    task          : ${TASK_NAME}"
 echo "    yaml          : ${TASK_YAML_REL}"
 echo "    n_runs        : ${N_RUNS}"
+echo "    backend/model : (from ~/Dillinger/.env)"
 echo
 
 # ---- 1. start runtime container --------------------------------------------
@@ -126,9 +119,6 @@ echo "==> [2/4] Loading ~/Dillinger/.env"
 set -a
 source "${DILLINGER_DIR}/.env"
 set +a
-# Bedrock model can be overridden by user env even after sourcing .env.
-export CONDUIT_BEDROCK_MODEL
-export CONDUIT_AGENT_BACKEND="bedrock_cua"
 
 # ---- 3. run the task --------------------------------------------------------
 echo "==> [3/4] Running task: ${TASK_NAME}"
@@ -137,7 +127,6 @@ uv run conduit run \
   --tasks-file "${TASK_YAML_REL}" \
   --task "${TASK_NAME}" \
   --runs "${N_RUNS}" \
-  --backend bedrock_cua \
   --runtime-url "http://127.0.0.1:${RUNTIME_PORT}" \
   --runtime-container "${CONTAINER_NAME}"
 END=$(date +%s)

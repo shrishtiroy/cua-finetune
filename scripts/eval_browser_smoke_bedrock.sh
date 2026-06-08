@@ -1,43 +1,31 @@
 #!/usr/bin/env bash
-# Phase 3b smoke test using Anthropic's NATIVE computer-use API via AWS
-# Bedrock. This is the cleanest "borrow-someone-else's-CUA" path because:
+# Phase 3b smoke test: Anthropic native computer-use via AWS Bedrock,
+# bypassing run_conduit.sh entirely.
 #
-#   1. Dillinger's bedrock_cua backend already implements the official
-#      computer_20250124 / computer_20251124 tool spec (the actual API
-#      Anthropic CUAs are trained against — not generic JSON tool calling).
-#   2. AWS_* creds + CONDUIT_AGENT_BACKEND=bedrock_cua are already present
-#      in ~/Dillinger/.env, so we don't have to patch anything.
-#   3. We're not paying Tzafon margin or LiteLLM wrapper overhead.
+# Why bypass run_conduit.sh: it has `require_cmd npm` BEFORE the
+# CONDUIT_SKIP_SETUP gate, and it always boots the viewer process.
+# `conduit run` itself only needs npm/viewer when --watch is passed,
+# so we call it directly and skip the whole UI machinery.
 #
-# What this script validates (everything BUT our model):
+# What this validates (everything BUT our model):
 #   - conduit-runtime container boots and serves /health
 #   - pywb archive replay loads docs-python-org.wacz
 #   - the agent loop drives the browser turn-by-turn until terminate
-#   - the rubric grader (Claude Opus via LiteLLM judge) returns a score
-#
-# If this passes, the only remaining unknown is whether our vLLM-served
-# Qwen/Kimi/DeepSeek can produce parseable actions. If this fails, we
-# have a Dillinger / Docker / archive / grading problem, not a model
-# problem.
+#   - the rubric grader returns a score
 #
 # Cost: ~$0.50 per run (1 task, ~10 turns of Bedrock Opus + 1 grading call).
 #
-# Pre-reqs (verify before running):
-#   - lambda_browser_setup.sh has succeeded
-#   - ~/Dillinger/.env contains:
-#       AWS_ACCESS_KEY_ID=...
-#       AWS_SECRET_ACCESS_KEY=...
-#       AWS_REGION_NAME=us-east-1            (or your preferred region)
-#       CONDUIT_AGENT_BACKEND=bedrock_cua    (default in your .env already)
-#       LITELLM_API_KEY=...                  (used by the rubric grader)
-#       ANTHROPIC_API_KEY=...                (used by anthropic judge backend)
-#   - Your AWS account has Bedrock model access enabled for Claude Opus
-#     in your selected region (one-time grant in the AWS console).
+# Pre-reqs:
+#   - lambda_browser_setup.sh has succeeded (built conduit-runtime image,
+#     ran `uv sync` in ~/Dillinger so the conduit CLI is available)
+#   - ~/Dillinger/.env contains AWS_* creds, ANTHROPIC_API_KEY, LITELLM_API_KEY
+#   - AWS account has Bedrock model access enabled for Claude Opus in your
+#     region (one-time grant in AWS console -> Bedrock -> Model access).
 #
 # Usage:
 #   bash scripts/eval_browser_smoke_bedrock.sh
 #   bash scripts/eval_browser_smoke_bedrock.sh pydocs-os-urandom-pep
-#   CONDUIT_BEDROCK_MODEL=global.anthropic.claude-opus-4-7 \
+#   CONDUIT_BEDROCK_MODEL=us.anthropic.claude-opus-4-5-20251101-v1:0 \
 #     bash scripts/eval_browser_smoke_bedrock.sh
 
 set -euo pipefail
@@ -45,21 +33,19 @@ set -euo pipefail
 DILLINGER_DIR="${HOME}/Dillinger"
 TASK_NAME="${1:-pydocs-os-sched-policy}"
 N_RUNS="${2:-1}"
+RUNTIME_PORT="${RUNTIME_PORT:-7777}"
+CONTAINER_NAME="conduit-runtime-smoke-bedrock"
 
-# Default to Claude Opus 4.5 on Bedrock (one of the models bedrock_cua's
-# _NEW_BETA_PATTERNS list recognises and routes through the
-# computer-use-2025-11-24 beta header). User can override via env.
+# Default to Claude Opus 4.5 on Bedrock.
 export CONDUIT_BEDROCK_MODEL="${CONDUIT_BEDROCK_MODEL:-global.anthropic.claude-opus-4-5}"
-export CONDUIT_AGENT_BACKEND="bedrock_cua"
 
-# CONDUIT_SKIP_SETUP=1 short-circuits run_conduit.sh's heavy first-run
-# steps (uv sync / playwright install / npm install / npm run build /
-# docker build). Note: it does NOT skip the `require_cmd npm` gate
-# itself (that runs before the env check), so npm must already be on
-# PATH — `lambda_browser_setup.sh` installs it.
-export CONDUIT_SKIP_SETUP=1
+DOCKER_CMD="docker"
+if ! docker info >/dev/null 2>&1; then
+  DOCKER_CMD="sudo docker"
+fi
 
-# Sanity-check the env first so we fail before spinning up Docker.
+# ---- 0. preflight -----------------------------------------------------------
+echo "==> [0/4] Preflight"
 if [[ ! -d "${DILLINGER_DIR}" ]]; then
   echo "ERROR: ${DILLINGER_DIR} not found. Run lambda_browser_setup.sh first." >&2
   exit 2
@@ -68,16 +54,19 @@ if [[ ! -f "${DILLINGER_DIR}/.env" ]]; then
   echo "ERROR: ${DILLINGER_DIR}/.env missing" >&2
   exit 2
 fi
+if ! ${DOCKER_CMD} image inspect conduit-runtime >/dev/null 2>&1; then
+  echo "ERROR: conduit-runtime Docker image not built. Run lambda_browser_setup.sh." >&2
+  exit 2
+fi
 
 missing_keys=()
-for key in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION_NAME LITELLM_API_KEY; do
+for key in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION_NAME LITELLM_API_KEY ANTHROPIC_API_KEY; do
   if ! grep -qE "^${key}=.+" "${DILLINGER_DIR}/.env"; then
     missing_keys+=("${key}")
   fi
 done
 if (( ${#missing_keys[@]} > 0 )); then
   echo "ERROR: ${DILLINGER_DIR}/.env is missing: ${missing_keys[*]}" >&2
-  echo "       Bedrock smoke test requires these. Add them and re-run." >&2
   exit 2
 fi
 
@@ -90,47 +79,94 @@ if [[ -z "${TASK_YAML}" ]]; then
   grep -rh "^- name: pydocs-" tasks/ 2>/dev/null | head -8 >&2
   exit 2
 fi
+TASK_YAML_REL="${TASK_YAML#${DILLINGER_DIR}/}"
 
-echo "==> Bedrock smoke test"
 echo "    backend       : bedrock_cua"
 echo "    model         : ${CONDUIT_BEDROCK_MODEL}"
-echo "    region        : (from .env AWS_REGION_NAME)"
 echo "    task          : ${TASK_NAME}"
-echo "    yaml          : ${TASK_YAML}"
+echo "    yaml          : ${TASK_YAML_REL}"
 echo "    n_runs        : ${N_RUNS}"
-echo "    skip_setup    : ${CONDUIT_SKIP_SETUP}"
 echo
 
-bash ./run_conduit.sh -k "${N_RUNS}" "${TASK_YAML}" --task "${TASK_NAME}"
+# ---- 1. start runtime container --------------------------------------------
+echo "==> [1/4] Booting conduit-runtime on :${RUNTIME_PORT}"
+${DOCKER_CMD} rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+${DOCKER_CMD} run -d --rm \
+  --name "${CONTAINER_NAME}" \
+  -p ${RUNTIME_PORT}:8000 \
+  -p 5900:5900 \
+  -p 8080:8080 \
+  conduit-runtime >/dev/null
+
+cleanup() {
+  echo
+  echo "==> Tearing down ${CONTAINER_NAME}"
+  ${DOCKER_CMD} rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT INT TERM
+
+echo -n "    waiting for /health"
+for i in $(seq 1 60); do
+  if curl -fsS "http://127.0.0.1:${RUNTIME_PORT}/health" >/dev/null 2>&1; then
+    echo " -> healthy"
+    break
+  fi
+  echo -n "."
+  sleep 2
+  if [[ $i -eq 60 ]]; then
+    echo
+    echo "ERROR: runtime did not become healthy in 2 minutes. Logs:"
+    ${DOCKER_CMD} logs "${CONTAINER_NAME}" | tail -40
+    exit 3
+  fi
+done
+
+# ---- 2. export .env so conduit picks it up ----------------------------------
+echo "==> [2/4] Loading ~/Dillinger/.env"
+set -a
+source "${DILLINGER_DIR}/.env"
+set +a
+# Bedrock model can be overridden by user env even after sourcing .env.
+export CONDUIT_BEDROCK_MODEL
+export CONDUIT_AGENT_BACKEND="bedrock_cua"
+
+# ---- 3. run the task --------------------------------------------------------
+echo "==> [3/4] Running task: ${TASK_NAME}"
+START=$(date +%s)
+uv run conduit run \
+  --tasks-file "${TASK_YAML_REL}" \
+  --task "${TASK_NAME}" \
+  --runs "${N_RUNS}" \
+  --backend bedrock_cua \
+  --runtime-url "http://127.0.0.1:${RUNTIME_PORT}" \
+  --runtime-container "${CONTAINER_NAME}"
+END=$(date +%s)
+echo "    Wall-clock: $((END - START))s"
+
+# ---- 4. inspect result ------------------------------------------------------
+echo "==> [4/4] Result"
+LATEST_RUN_DIR="$(ls -td "${DILLINGER_DIR}/runs/${TASK_NAME}"/* 2>/dev/null | head -1 || true)"
+if [[ -n "${LATEST_RUN_DIR}" ]]; then
+  echo "    ${LATEST_RUN_DIR}"
+  if [[ -f "${LATEST_RUN_DIR}/result.json" ]]; then
+    python3 -c "
+import json
+r = json.load(open('${LATEST_RUN_DIR}/result.json'))
+print(f\"    score = {r.get('score', 'N/A')}\")
+for s in (r.get('subscores') or []):
+    print(f\"      {s.get('weight', 0):3}pt  {s.get('met', '?')!s:5}  {(s.get('requirement') or '')[:60]}\")
+"
+  else
+    echo "    (no result.json — task may have crashed before grading)"
+  fi
+else
+  echo "    (no run output found)"
+fi
 
 echo
 echo "============================================================"
 echo "  Smoke test complete."
 echo "============================================================"
-echo "  Latest run:"
-LATEST_RUN_DIR="$(ls -td "${DILLINGER_DIR}/runs/${TASK_NAME}"/* 2>/dev/null | head -1 || true)"
-if [[ -n "${LATEST_RUN_DIR}" ]]; then
-  echo "    ${LATEST_RUN_DIR}"
-  if [[ -f "${LATEST_RUN_DIR}/result.json" ]]; then
-    echo "  Score (from result.json):"
-    python3 -c "
-import json, sys
-try:
-    r = json.load(open('${LATEST_RUN_DIR}/result.json'))
-    print(f\"    score={r.get('score', 'N/A')}\")
-    if 'subscores' in r:
-        for s in r['subscores']:
-            print(f\"      {s.get('weight', 0)}pt - {s.get('met', '?'):5} - {(s.get('requirement') or '')[:60]}\")
-except Exception as e:
-    print(f'    (could not parse result.json: {e})')
-"
-  else
-    echo "  (no result.json yet — run may have failed before grading)"
-  fi
-else
-  echo "    (no run output found — the loop may not have started)"
-fi
-echo
 echo "  Pass criterion: any score appears at all (even 0.0 with non-empty"
-echo "  subscores). That proves runtime + replay + agent + grading all"
-echo "  fired end-to-end."
+echo "  subscores). That proves runtime + replay + agent + grading fired"
+echo "  end-to-end."

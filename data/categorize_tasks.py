@@ -60,7 +60,6 @@ CATEGORY_KEYWORDS: list[tuple[str, list[str]]] = [
     ("C2_structured", [
         "scrapethissite", "sts-", "sts_", "githut", "csrankings",
         "400freestyle", "lolpros", "reuters",
-        "fed-reserve", "fed_reserve",
         "cross-ref-", "cross_ref_",
         "cmu-",
         "cambridge-",
@@ -86,6 +85,8 @@ CATEGORY_KEYWORDS: list[tuple[str, list[str]]] = [
         "gov-", "gov_",
         "fema",
         "medicare",
+        "fed-reserve", "fed_reserve",
+        "usaspending", "usaspending-",
         "-county-", "_county_", "-county/", "county-permits",
         "planning-zoning", "planning_zoning",
         "permits-inspections", "permits_inspections",

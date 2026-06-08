@@ -1,25 +1,27 @@
 held_out_per_category:
   C1_ui_nav:
-  - worldshapin-india-most-distorted-axis-identification
-  - worldshapin-south-africa-collapsing-axis
+  - thatsedu-transfers-effect-scarcity
+  - worldshapin-russia-shape-explosion-1995
+  - rhythm-of-food-peach-least-searched-season
+  - peoplemovin-sort-migrants-high-range
+  - karthikeya-box-laser-cut-dimensions-vs-screen-count
   - thatsedu-social-contribution-dominance
-  - peoplemovin-sort-migrants-low-range
-  - karthikeya-data-table-vs-bar-chart-verification
-  - karthikeya-three-project-dataviz-tools-comparison
+  - nasa-satellites-jul-2009
   - gapminder-carbon-emissions-by-country
   C2_structured:
   - reuters-insect-arachnid-assessed-pct
   - sts-zero-pop
   C3_docs:
-  - pydocs-modindex-tkinter-count
-  - pydocs-find-getloadavg
-  - pydocs-ordereddict-move-to-end
-  - pydocs-os-sched-policy
-  - pydocs-os-urandom-pep
+  - pydocs-class-getitem-purpose
+  - pydocs-async-context-dunder
+  - pydocs-modindex-z-modules
+  - pydocs-sorted-vs-list-sort
+  - pydocs-zip-strict-version
   C4_shopping:
   - allbirds-new-arrivals-sole-colors
   - portillos-just-moved-west-coast-im
-  C5_government: []
+  C5_government:
+  - noaa-slr-miami-highest-dry-level
   C99_other:
   - task_e108
   - task_e46

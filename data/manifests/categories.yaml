@@ -1,10 +1,10 @@
 counts:
   C1_ui_nav: 92
-  C2_structured: 37
+  C2_structured: 35
   C3_docs: 44
   C4_shopping: 52
-  C5_government: 25
-  C99_other: 139
+  C5_government: 29
+  C99_other: 137
   C_drop_non_browser: 12
 tasks:
   _old: C99_other
@@ -74,8 +74,8 @@ tasks:
   eatwellatx-vegan-symbol-meaning-differs: C4_shopping
   eatwellatx-vegetarian-vs-vegan-dinner: C4_shopping
   edg-blue-side-ban-role-most: C2_structured
-  fed-reserve-metropolitan-statistical-areas-unemployment-rate-greater-than-10: C2_structured
-  fed-reserve-unemployment-rate-difference-california-vs-texas: C2_structured
+  fed-reserve-metropolitan-statistical-areas-unemployment-rate-greater-than-10: C5_government
+  fed-reserve-unemployment-rate-difference-california-vs-texas: C5_government
   filebrowser-rename-broken: C_drop_non_browser
   flatnotes-content-truncation: C_drop_non_browser
   fleet-map-chase-center-high-risk: C1_ui_nav
@@ -384,8 +384,8 @@ tasks:
   uber-demos-total-refund-amount: C99_other
   uber-eats-chipotle-delivery-eta: C99_other
   us-bureau-of-labor-cpi-statistic: C99_other
-  usaspending-cellco-vs-eldery-handicapped-fund: C99_other
-  usaspending-commodity-assistance-program-outlays: C99_other
+  usaspending-cellco-vs-eldery-handicapped-fund: C5_government
+  usaspending-commodity-assistance-program-outlays: C5_government
   vizcaya-water-level: C99_other
   wordle-archive-11: C99_other
   wordsearch-family-guy-shared-letters: C99_other

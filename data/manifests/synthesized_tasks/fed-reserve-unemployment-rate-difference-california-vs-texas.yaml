@@ -1,0 +1,12 @@
+name: fed-reserve-unemployment-rate-difference-california-vs-texas
+url: https://fred.stlouisfed.org/graph/?g=1wmdD#
+prompt: 'Consider the graph obtained by plotting half the unemployment rate in California
+  (unit: percent) subtracted by the unemployment rate in Texas (unit: percent) on
+  the y-axis and the year on the x-axis. In which month of which year, starting from
+  1976 to the beginning of 2026, was the difference most negative? What was the difference?
+  In which year was the sharpest decrease in the difference (most negative derivative
+  of the graph)?'
+rubric:
+- r: States the difference was most negative in December of 1986. The difference was
+    -6.05%. States that the sharpest decrease occured in the year 2020.
+  w: 100

@@ -4,8 +4,8 @@ max_per_task: 3
 train_frac: 0.7
 seed: 42
 require_yaml_for_test: true
-n_train_tasks: 121
-n_test_tasks: 24
+n_train_tasks: 119
+n_test_tasks: 26
 train_tasks:
 - allbirds-cart-total-socks-breezer-terraluxe
 - allbirds-rerun-clearance-white-shoe-pct
@@ -53,8 +53,8 @@ train_tasks:
 - hard-map-pan-south-san-jose-driver
 - kanboard-due-date-bug
 - karthikeya-bar-vs-line-chart-cross-reference-day
-- karthikeya-box-laser-cut-dimensions-vs-screen-count
 - karthikeya-cross-project-award-and-duration
+- karthikeya-data-table-vs-bar-chart-verification
 - karthikeya-east-coast-map-dot-color-cluster-counting
 - karthikeya-east-coast-map-statistics-reading
 - karthikeya-keychain-symbol-decode-cross-reference
@@ -65,33 +65,31 @@ train_tasks:
 - karthikeya-screens-aug-ideation-materials-comparison
 - karthikeya-screens-aug-line-graph-crossing-event
 - karthikeya-screens-aug-stacked-bar-lowest-day-annotation
+- karthikeya-three-project-dataviz-tools-comparison
 - last-to-100m
 - last_to_100m
 - linkding-tags-stripped
-- nasa-satellites-jul-2009
 - nasa-spacecraft-second-closest-pair
 - ncase-trust-copycat-threshold-simulation
-- noaa-slr-miami-highest-dry-level
 - north_norfolk_takeaways_and_sandwich_shops_failed_inspections
-- peoplemovin-sort-migrants-high-range
+- peoplemovin-sort-migrants-low-range
 - peoplemovin-sort-migrants-mid-range
-- pydocs-async-context-dunder
-- pydocs-class-getitem-purpose
+- pydocs-find-getloadavg
 - pydocs-genericalias-classgetitem
 - pydocs-memoryview-release
-- pydocs-modindex-z-modules
+- pydocs-modindex-tkinter-count
+- pydocs-ordereddict-move-to-end
+- pydocs-os-sched-policy
+- pydocs-os-urandom-pep
 - pydocs-reduce-moved
 - pydocs-sched-setparam-vs-getparam
 - pydocs-sorted-stability
-- pydocs-sorted-vs-list-sort
-- pydocs-zip-strict-version
 - refresh-editor-session
 - response-to-second
 - reuters-insect-fox-prey-chain
 - reuters-insect-species-sum
 - reuters-insect-third-most-assessed
 - rhythm-of-food-herbs-spices-summer-popularity
-- rhythm-of-food-peach-least-searched-season
 - sf-temp-housing-may-june
 - speedrun-oot-g7-absence
 - stellarium-web-visibility-comparison
@@ -115,7 +113,6 @@ train_tasks:
 - text-entry-calibration
 - thatsedu-bubble-ratio
 - thatsedu-cost-leader-reversal
-- thatsedu-transfers-effect-scarcity
 - top-migrant-destination-barbados
 - top_migrant_destination_jamaica
 - uat-bench/excalidraw-pr8316-functionality-before
@@ -127,20 +124,23 @@ train_tasks:
 - usaspending-cellco-vs-eldery-handicapped-fund
 - usaspending-commodity-assistance-program-outlays
 - wordle-archive-11
-- worldshapin-russia-shape-explosion-1995
+- worldshapin-india-most-distorted-axis-identification
+- worldshapin-south-africa-collapsing-axis
 test_tasks:
 - allbirds-new-arrivals-sole-colors
 - gapminder-carbon-emissions-by-country
-- karthikeya-data-table-vs-bar-chart-verification
-- karthikeya-three-project-dataviz-tools-comparison
-- peoplemovin-sort-migrants-low-range
+- karthikeya-box-laser-cut-dimensions-vs-screen-count
+- nasa-satellites-jul-2009
+- noaa-slr-miami-highest-dry-level
+- peoplemovin-sort-migrants-high-range
 - portillos-just-moved-west-coast-im
-- pydocs-find-getloadavg
-- pydocs-modindex-tkinter-count
-- pydocs-ordereddict-move-to-end
-- pydocs-os-sched-policy
-- pydocs-os-urandom-pep
+- pydocs-async-context-dunder
+- pydocs-class-getitem-purpose
+- pydocs-modindex-z-modules
+- pydocs-sorted-vs-list-sort
+- pydocs-zip-strict-version
 - reuters-insect-arachnid-assessed-pct
+- rhythm-of-food-peach-least-searched-season
 - sts-zero-pop
 - task_e1
 - task_e108
@@ -150,9 +150,9 @@ test_tasks:
 - task_e66
 - task_e87
 - thatsedu-social-contribution-dominance
+- thatsedu-transfers-effect-scarcity
 - worldbank-sdg-poverty-fiji-maldives
-- worldshapin-india-most-distorted-axis-identification
-- worldshapin-south-africa-collapsing-axis
+- worldshapin-russia-shape-explosion-1995
 dropped_tasks:
 - _old
 - allbirds-mens-sneakers-avg-discount
@@ -249,20 +249,20 @@ dropped_tasks:
 thin_fallback_categories: []
 yaml_eligibility:
   yaml_constraint_active: true
-  n_yaml_eligible_total: 298
+  n_yaml_eligible_total: 341
   eligible_per_category:
     C4_shopping: 7
     C99_other: 28
     C2_structured: 7
-    C1_ui_nav: 24
-    C5_government: 1
+    C1_ui_nav: 27
+    C5_government: 4
     C3_docs: 15
-  forced_to_train_count: 63
+  forced_to_train_count: 57
   forced_to_train_per_category:
     C4_shopping: 1
-    C99_other: 26
-    C2_structured: 6
-    C1_ui_nav: 20
+    C99_other: 24
+    C2_structured: 5
+    C1_ui_nav: 17
     C5_government: 10
   forced_to_train_sample:
     C4_shopping:

@@ -1,25 +1,25 @@
-n_train_examples: 7858
-n_test_examples: 646
-n_train_tasks: 121
-n_test_tasks: 24
+n_train_examples: 7570
+n_test_examples: 934
+n_train_tasks: 119
+n_test_tasks: 26
 examples_per_category:
   C1_ui_nav:
-    train: 2265
-    test: 349
+    train: 2149
+    test: 465
   C2_structured:
-    train: 794
+    train: 490
     test: 27
   C3_docs:
-    train: 320
-    test: 25
+    train: 206
+    test: 139
   C4_shopping:
     train: 533
     test: 70
   C5_government:
-    train: 1397
-    test: 0
+    train: 2248
+    test: 58
   C99_other:
-    train: 2549
+    train: 1944
     test: 175
 mean_steps_per_trajectory: 41.28
 dropped_task_count: 92

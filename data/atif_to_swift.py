@@ -69,6 +69,8 @@ DEFAULT_TASK_YAML_ROOTS = [
     SIBLINGS / "liveweb" / "dylan",
     SIBLINGS / "liveweb" / "healthcheck",
     SIBLINGS / "qa-cua-bench" / "tasks",
+    # YAMLs synthesized from the CortexBench/Liveweb CSVs by data/csv_to_yaml.py.
+    REPO_ROOT / "data" / "manifests" / "synthesized_tasks",
 ]
 
 DEFAULT_CATEGORY = "C99_other"

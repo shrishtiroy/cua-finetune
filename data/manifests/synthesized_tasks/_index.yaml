@@ -1,0 +1,45 @@
+synthesized_count: 6
+csv_dir: data/manifests/raw_csv
+tasks:
+- name: fed-reserve-unemployment-rate-difference-california-vs-texas
+  source_csv: CortexBench _ Liveweb Task Manager - 💫 Opus Difficulty; In Progress.csv
+  out_path: data/manifests/synthesized_tasks/fed-reserve-unemployment-rate-difference-california-vs-texas.yaml
+  url: https://fred.stlouisfed.org/graph/?g=1wmdD#
+  n_rubric_items: 1
+  total_rubric_weight: 100
+  has_archive: false
+- name: gapminder-climate-change-threat-argentina
+  source_csv: CortexBench _ Liveweb Task Manager - 🙃 Tzafon.csv
+  out_path: data/manifests/synthesized_tasks/gapminder-climate-change-threat-argentina.yaml
+  url: https://www.gapminder.org/tools/#$chart-type=map&url=v2
+  n_rubric_items: 2
+  total_rubric_weight: 100
+  has_archive: false
+- name: gapminder-gdp-life-expectancy-1996
+  source_csv: CortexBench _ Liveweb Task Manager - 🙃 Tzafon.csv
+  out_path: data/manifests/synthesized_tasks/gapminder-gdp-life-expectancy-1996.yaml
+  url: https://www.gapminder.org/tools/#$chart-type=bubbles&url=v2
+  n_rubric_items: 3
+  total_rubric_weight: 100
+  has_archive: false
+- name: gapminder-gdp-per-employee-2024
+  source_csv: CortexBench _ Liveweb Task Manager - 🙃 Tzafon.csv
+  out_path: data/manifests/synthesized_tasks/gapminder-gdp-per-employee-2024.yaml
+  url: https://www.gapminder.org/tools/#$chart-type=barrank&url=v2
+  n_rubric_items: 2
+  total_rubric_weight: 100
+  has_archive: false
+- name: gb-de-new-castle-county-permits-inspections-t01-workflow-requirements
+  source_csv: CortexBench _ Liveweb Task Manager - 🙃 Tzafon.csv
+  out_path: data/manifests/synthesized_tasks/gb-de-new-castle-county-permits-inspections-t01-workflow-requirements.yaml
+  url: https://www.newcastlede.gov/2503/Permits-Inspections
+  n_rubric_items: 4
+  total_rubric_weight: 100
+  has_archive: false
+- name: usaspending-commodity-assistance-program-outlays
+  source_csv: CortexBench _ Liveweb Task Manager - 💫 Opus Difficulty; In Progress.csv
+  out_path: data/manifests/synthesized_tasks/usaspending-commodity-assistance-program-outlays.yaml
+  url: https://www.usaspending.gov/explorer/budget_function
+  n_rubric_items: 1
+  total_rubric_weight: 100
+  has_archive: false

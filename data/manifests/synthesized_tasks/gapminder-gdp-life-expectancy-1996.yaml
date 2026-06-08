@@ -1,0 +1,12 @@
+name: gapminder-gdp-life-expectancy-1996
+url: https://www.gapminder.org/tools/#$chart-type=bubbles&url=v2
+prompt: Using the Gapminder tools, find the difference in GDP per capita between Ireland
+  and Greece in 1996. Also report both country's life expectanies in 1996.
+rubric:
+- r: States the difference in GDP per capita between Ireland and Greece in 1996 is
+    10.9k
+  w: 40
+- r: States Ireland's life expectancy in 1996 is 76
+  w: 30
+- r: States Greece's life expectancy in 1996 is 77.9
+  w: 30

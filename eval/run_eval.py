@@ -49,6 +49,8 @@ TASK_DIRS = [
     REPO_ROOT.parent / "liveweb" / "dylan",
     REPO_ROOT.parent / "liveweb" / "healthcheck",
     REPO_ROOT.parent / "qa-cua-bench" / "tasks",
+    # YAMLs synthesized from CortexBench/Liveweb CSVs (see data/csv_to_yaml.py).
+    REPO_ROOT / "data" / "manifests" / "synthesized_tasks",
 ]
 
 

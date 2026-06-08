@@ -114,13 +114,27 @@ for i in $(seq 1 120); do
   fi
 done
 
+# Run from Dillinger's uv-managed venv: conduit + httpx + pydantic + all deps
+# live there. Our eval/backends/*.py and eval/run_eval.py are picked up via
+# PYTHONPATH=$CUA_REPO so they can `from conduit.config import load_settings`
+# AND import each other. Running from cua-finetune's own .venv doesn't work
+# because (a) it's python 3.10, but conduit requires 3.11+, and (b) it doesn't
+# have conduit's runtime deps (litellm, anthropic, playwright protocol bits).
+DILLINGER_DIR="${HOME}/Dillinger"
+if [[ ! -d "${DILLINGER_DIR}/.venv" ]]; then
+  echo "ERROR: ${DILLINGER_DIR}/.venv not found. Run lambda_browser_setup.sh first." >&2
+  exit 2
+fi
+
+mkdir -p "${CUA_REPO}/logs"
+
 # ---- 2. dry-run plan --------------------------------------------------------
-cd "${CUA_REPO}"
-source .venv/bin/activate
 echo "==> [2/4] Dry-run plan (resolves task YAMLs without running anything)"
+cd "${DILLINGER_DIR}"
+PYTHONPATH="${CUA_REPO}" \
 CUA_LORA_ADAPTER="${ADAPTER}" \
 CONDUIT_RUNTIME_URL="http://127.0.0.1:${RUNTIME_PORT}" \
-  python eval/run_eval.py \
+  uv run python "${CUA_REPO}/eval/run_eval.py" \
     --backend "${BACKEND}" \
     --pass-k "${PASS_K}" \
     --runtime-container "${CONTAINER_NAME}" \
@@ -131,16 +145,17 @@ CONDUIT_RUNTIME_URL="http://127.0.0.1:${RUNTIME_PORT}" \
 # ---- 3. real run ------------------------------------------------------------
 echo "==> [3/4] Real run: ${BACKEND} adapter=${ADAPTER} pass_k=${PASS_K}"
 START=$(date +%s)
+PYTHONPATH="${CUA_REPO}" \
 CUA_LORA_ADAPTER="${ADAPTER}" \
 CONDUIT_RUNTIME_URL="http://127.0.0.1:${RUNTIME_PORT}" \
 VLLM_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1" \
-  python eval/run_eval.py \
+  uv run python "${CUA_REPO}/eval/run_eval.py" \
     --backend "${BACKEND}" \
     --pass-k "${PASS_K}" \
     --runtime-container "${CONTAINER_NAME}" \
     --runtime-url "http://127.0.0.1:${RUNTIME_PORT}" \
     ${LIVE_WEB_FLAG} \
-    -v 2>&1 | tee "logs/eval_${BACKEND}_${ADAPTER}_$(date +%Y%m%d_%H%M%S).log"
+    -v 2>&1 | tee "${CUA_REPO}/logs/eval_${BACKEND}_${ADAPTER}_$(date +%Y%m%d_%H%M%S).log"
 END=$(date +%s)
 echo "  Wall-clock: $((END - START))s"
 

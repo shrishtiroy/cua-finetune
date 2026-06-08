@@ -8,12 +8,18 @@ Before kicking off a $22 / 3-hour baseline run, prove that:
 
 Costs roughly $0 (10-20 tokens of inference, no grading judge).
 
-Usage::
+Usage on Lambda (must run from Dillinger's uv-managed venv because
+``conduit`` and its deps live there, not in cua-finetune's .venv)::
 
-    # In a tmux: scripts/serve_vllm.sh Qwen/Qwen3-VL-8B-Instruct  (port 8000)
-    python scripts/smoke_backend.py --backend qwen_vl_cua
-    python scripts/smoke_backend.py --backend kimi_vl_cua
-    python scripts/smoke_backend.py --backend deepseek_vl_cua
+    # In a tmux: bash scripts/serve_vllm.sh Qwen/Qwen3-VL-8B-Instruct
+    # In another:
+    cd ~/Dillinger
+    PYTHONPATH=~/cua-finetune \\
+      uv run python ~/cua-finetune/scripts/smoke_backend.py --backend qwen_vl_cua
+
+Or use the helper that handles the venv plumbing for you:
+
+    bash ~/cua-finetune/scripts/smoke_backend.sh qwen_vl_cua
 
 Exit code 0 = parse OK; 1 = parse failure; 2 = transport failure.
 """

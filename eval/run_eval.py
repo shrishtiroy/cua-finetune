@@ -33,13 +33,22 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HELDOUT = REPO_ROOT / "data" / "manifests" / "held_out_tasks.yaml"
 DEFAULT_RESULTS = REPO_ROOT / "results"
 
-# Standard task search paths.
+# Standard task search paths. Kept in sync with
+# data/atif_to_swift.py:DEFAULT_TASK_YAML_ROOTS so the splitter's
+# yaml-eligibility check and the eval driver's task resolver see
+# the same universe of task definitions.
 TASK_DIRS = [
+    REPO_ROOT.parent / "Dillinger" / "tasks",
+    REPO_ROOT.parent / "Dillinger" / "QA",
+    REPO_ROOT.parent / "Dillinger" / "environments",
+    REPO_ROOT.parent / "Dillinger" / "environments-realworld",
     REPO_ROOT.parent / "project-dojo" / "staging",
     REPO_ROOT.parent / "project-dojo" / "accepted",
     REPO_ROOT.parent / "liveweb" / "tasks",
     REPO_ROOT.parent / "liveweb" / "example_tasks",
-    REPO_ROOT.parent / "Dillinger" / "tasks",
+    REPO_ROOT.parent / "liveweb" / "dylan",
+    REPO_ROOT.parent / "liveweb" / "healthcheck",
+    REPO_ROOT.parent / "qa-cua-bench" / "tasks",
 ]
 
 

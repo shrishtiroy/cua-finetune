@@ -63,7 +63,11 @@ DEFAULT_TASK_YAML_ROOTS = [
     SIBLINGS / "Dillinger" / "environments",
     SIBLINGS / "Dillinger" / "environments-realworld",
     SIBLINGS / "project-dojo" / "staging",
+    SIBLINGS / "project-dojo" / "accepted",
     SIBLINGS / "liveweb" / "tasks",
+    SIBLINGS / "liveweb" / "example_tasks",
+    SIBLINGS / "liveweb" / "dylan",
+    SIBLINGS / "liveweb" / "healthcheck",
     SIBLINGS / "qa-cua-bench" / "tasks",
 ]
 

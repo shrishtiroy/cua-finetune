@@ -32,6 +32,17 @@ BACKEND="${1:?BACKEND required (qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | ll
 ADAPTER="${2:-baseline}"
 PASS_K="${3:-1}"
 
+# Set CUA_LIVE_WEB=1 (default) to bypass pywb archive replay and have the agent
+# hit live URLs. Set to 0 to use archive replay (requires .wacz files in
+# ~/Dillinger/archives/). Live-web is the simpler path: no archive transfer
+# needed, but verifiers written against frozen archive state may drift.
+LIVE_WEB="${CUA_LIVE_WEB:-1}"
+LIVE_WEB_FLAG=""
+if [[ "${LIVE_WEB}" == "1" ]]; then
+  LIVE_WEB_FLAG="--live-web"
+  echo "Live-web mode ON (--live-web). Set CUA_LIVE_WEB=0 to use archive replay."
+fi
+
 CUA_REPO="${HOME}/cua-finetune"
 RUNTIME_PORT=7777
 VLLM_PORT=8000
@@ -106,6 +117,7 @@ CONDUIT_RUNTIME_URL="http://127.0.0.1:${RUNTIME_PORT}" \
     --pass-k "${PASS_K}" \
     --runtime-container "${CONTAINER_NAME}" \
     --runtime-url "http://127.0.0.1:${RUNTIME_PORT}" \
+    ${LIVE_WEB_FLAG} \
     --dry-run
 
 # ---- 3. real run ------------------------------------------------------------
@@ -119,6 +131,7 @@ VLLM_BASE_URL="http://127.0.0.1:${VLLM_PORT}/v1" \
     --pass-k "${PASS_K}" \
     --runtime-container "${CONTAINER_NAME}" \
     --runtime-url "http://127.0.0.1:${RUNTIME_PORT}" \
+    ${LIVE_WEB_FLAG} \
     -v 2>&1 | tee "logs/eval_${BACKEND}_${ADAPTER}_$(date +%Y%m%d_%H%M%S).log"
 END=$(date +%s)
 echo "  Wall-clock: $((END - START))s"

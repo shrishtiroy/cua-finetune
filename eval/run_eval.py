@@ -108,6 +108,13 @@ def main() -> int:
     parser.add_argument("--runtime-container", default="conduit-runtime")
     parser.add_argument("--dry-run", action="store_true",
                         help="Resolve tasks and print plan, but don't run anything")
+    parser.add_argument("--live-web", action="store_true",
+                        help="Force every task to run against the live internet "
+                             "instead of pywb-archived .wacz replays. Strips the "
+                             "TaskSpec.archives field before handing the task to "
+                             "conduit. Faster setup (no archive transfer), but "
+                             "verifiers written against frozen archive state may "
+                             "fail on time-sensitive sites.")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
@@ -133,12 +140,29 @@ def main() -> int:
     # any wall-clock time on the runtime.
     plan: list[tuple[str, str, Any, Path]] = []  # (cat, name, TaskSpec, source_yaml)
     missing: list[str] = []
+    n_archives_stripped = 0
     for cat, name in tasks_raw:
         task, source_yaml = _resolve_task(name)
         if task is None:
             missing.append(name)
             continue
+        if args.live_web and getattr(task, "archives", None):
+            # Empty archives list -> conduit's runtime takes the live-web path
+            # (browser_server.RuntimeState.activate_archives short-circuits when
+            # the list is empty).
+            n_archives_stripped += 1
+            try:
+                task.archives = []
+            except (AttributeError, TypeError):
+                # TaskSpec is a dataclass with slots; tolerate frozen variants by
+                # rebuilding via dataclasses.replace if direct assignment fails.
+                import dataclasses
+                task = dataclasses.replace(task, archives=[])
         plan.append((cat, name, task, source_yaml))
+
+    if args.live_web:
+        logger.info("--live-web: stripped archives from %d task(s); all tasks will hit live URLs",
+                    n_archives_stripped)
 
     if missing:
         logger.warning("Could not resolve %d task(s): %s", len(missing), missing)

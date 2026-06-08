@@ -1,14 +1,22 @@
-"""Phase 4a: aggregate per-run grade JSONs into the headline 4x5x2 table.
+"""Cross-model results aggregator.
 
-Walks ``results/<backend>/<adapter>/<task>/<ts>/result.json`` and joins on
-``data/manifests/categories.yaml``. Computes::
+Reads ``results/<backend>/<adapter>/_summary.jsonl`` for every (backend, adapter)
+pair present on disk and produces:
 
-    pass@1: at least one of the *first* attempt's score >= 80
-    pass@k: at least one of any of the k attempts' score >= 80
+  1. A pass@k table per (model × category) printed to stdout.
+  2. A flat JSON dump at ``results/_aggregate.json`` with all rows.
+  3. A CSV at ``results/_aggregate.csv`` suitable for the blog table.
 
-Outputs:
-    results/category_breakdown.csv          long-form (model, adapter, category, k, n, success_rate)
-    results/headline.md                     paired baseline/finetuned table per (model, category) + lifts
+pass@k semantics:
+  For each task we have ``k`` independent attempts (rows with attempt=0..k-1).
+  A task is considered "passed" if any attempt's score ≥ ``--pass-threshold``
+  (default 1.0). pass@k = (# tasks passed) / (# tasks attempted).
+
+Usage::
+
+    python eval/aggregate_results.py                       # default: pass@1, score>=1.0
+    python eval/aggregate_results.py --pass-threshold 0.5  # partial credit counts
+    python eval/aggregate_results.py --adapter baseline    # only the baseline runs
 """
 
 from __future__ import annotations
@@ -22,213 +30,197 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 logger = logging.getLogger("aggregate_results")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = REPO_ROOT / "results"
-DEFAULT_CATEGORIES = REPO_ROOT / "data" / "manifests" / "categories.yaml"
 
-CATEGORY_LABELS = {
-    "C1": "UI Navigation & Interactive Viz",
-    "C2": "Structured Data & Tables",
-    "C3": "Documentation & Reference",
-    "C4": "E-commerce & Shopping",
-    "C5": "Government & Civic",
-    "C0": "Other / Uncategorized",
-}
-
-PASS_THRESHOLD = 80.0
+KNOWN_BACKENDS = ["qwen_vl_cua", "kimi_vl_cua", "deepseek_vl_cua", "llama_vision_cua"]
+CATEGORY_ORDER = ["C1_ui_nav", "C2_structured", "C3_docs", "C4_shopping", "C5_government", "C99_other"]
 
 
-def _load_categories(path: Path) -> dict[str, str]:
-    if not path.exists():
-        return {}
-    with path.open("r", encoding="utf-8") as h:
-        data = yaml.safe_load(h) or {}
-    if isinstance(data, dict):
-        return {str(k): str(v) for k, v in data.items() if isinstance(v, str)}
-    return {}
-
-
-def _walk_results(root: Path) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    if not root.exists():
-        return rows
-    # Layout: results/<backend>/<adapter>/<task>/<ts>/result.json
-    for backend_dir in sorted(p for p in root.iterdir() if p.is_dir()):
-        for adapter_dir in sorted(p for p in backend_dir.iterdir() if p.is_dir()):
-            for task_dir in sorted(p for p in adapter_dir.iterdir() if p.is_dir()):
-                # Each ts dir in task_dir is one attempt
-                attempt_idx = -1
-                for ts_dir in sorted(p for p in task_dir.iterdir() if p.is_dir()):
-                    attempt_idx += 1
-                    rj = ts_dir / "result.json"
-                    if not rj.exists():
+def _read_summaries(results_dir: Path, adapter_filter: str | None) -> dict[tuple[str, str], list[dict[str, Any]]]:
+    """Return ``{(backend, adapter): [row, ...]}`` from every ``_summary.jsonl`` found."""
+    out: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for backend_dir in sorted(results_dir.glob("*")):
+        if not backend_dir.is_dir() or backend_dir.name.startswith("_"):
+            continue
+        backend = backend_dir.name
+        for adapter_dir in sorted(backend_dir.glob("*")):
+            if not adapter_dir.is_dir():
+                continue
+            adapter = adapter_dir.name
+            if adapter_filter and adapter != adapter_filter:
+                continue
+            summary_path = adapter_dir / "_summary.jsonl"
+            if not summary_path.exists():
+                continue
+            rows = []
+            with summary_path.open("r", encoding="utf-8") as h:
+                for line in h:
+                    line = line.strip()
+                    if not line:
                         continue
                     try:
-                        data = json.loads(rj.read_text(encoding="utf-8"))
-                    except json.JSONDecodeError as exc:
-                        logger.warning("bad result.json: %s (%s)", rj, exc)
-                        continue
-                    grade = data.get("grade") or {}
-                    raw_score = grade.get("score")
-                    score = float(raw_score) * 100.0 if isinstance(raw_score, (int, float)) and 0.0 <= raw_score <= 1.0 else (
-                        float(raw_score) if isinstance(raw_score, (int, float)) else 0.0
-                    )
-                    rows.append({
-                        "backend": backend_dir.name,
-                        "adapter": adapter_dir.name,
-                        "task": task_dir.name,
-                        "attempt": attempt_idx,
-                        "score": score,
-                        "run_dir": str(ts_dir),
-                    })
-    return rows
+                        rows.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        logger.warning("could not parse line in %s", summary_path)
+            out[(backend, adapter)] = rows
+    return out
 
 
-def _passk_from_scores(scores: list[float], k: int, threshold: float) -> tuple[float, int]:
-    """Return (success_indicator_at_k_in_[0,1], n_attempts_used)."""
-    if not scores:
-        return 0.0, 0
-    take = scores[:k]
-    return (1.0 if any(s >= threshold for s in take) else 0.0), len(take)
-
-
-def _aggregate(rows: list[dict[str, Any]], categories: dict[str, str]) -> dict[str, Any]:
-    by_key: dict[tuple[str, str, str], list[float]] = defaultdict(list)
+def _pass_at_k(rows: list[dict[str, Any]], threshold: float) -> tuple[float, dict[str, float]]:
+    """Compute pass@k across all attempts in *rows*. Returns (overall, per_category)."""
+    per_task_best: dict[str, float] = defaultdict(float)
+    per_task_cat: dict[str, str] = {}
     for r in rows:
-        cat = categories.get(r["task"], "C0")
-        by_key[(r["backend"], r["adapter"], cat, r["task"])].append(r["score"]) if False else None
-    # Need 4-tuple including task — rebuild correctly
-    by_key = defaultdict(list)
-    for r in rows:
-        cat = categories.get(r["task"], "C0")
-        by_key[(r["backend"], r["adapter"], cat, r["task"])].append(r["score"])
+        task = r.get("task", "?")
+        cat = r.get("category", "?")
+        score = float(r.get("score", 0) or 0)
+        per_task_best[task] = max(per_task_best[task], score)
+        per_task_cat[task] = cat
 
-    out: dict[tuple[str, str, str], dict[str, Any]] = defaultdict(
-        lambda: {"pass_at_1_num": 0, "pass_at_5_num": 0, "n_tasks": 0, "tasks": []}
-    )
-    for (backend, adapter, cat, task), scores in by_key.items():
-        scores.sort(reverse=True)  # not strictly necessary; pass@k uses any-of
-        # Use INSERT order from results listing (already sorted by ts above)
-        # Re-fetch insertion order:
-        # (We'll just reuse `scores` here — for pass@k semantics any-of is order-independent.)
-        p1, _ = _passk_from_scores(scores, 1, PASS_THRESHOLD)
-        p5, _ = _passk_from_scores(scores, 5, PASS_THRESHOLD)
-        agg = out[(backend, adapter, cat)]
-        agg["pass_at_1_num"] += p1
-        agg["pass_at_5_num"] += p5
-        agg["n_tasks"] += 1
-        agg["tasks"].append(task)
+    if not per_task_best:
+        return 0.0, {}
 
-    long_rows: list[dict[str, Any]] = []
-    for (backend, adapter, cat), v in sorted(out.items()):
-        n = v["n_tasks"]
-        long_rows.append({
-            "backend": backend,
-            "adapter": adapter,
-            "category": cat,
-            "n_tasks": n,
-            "pass_at_1": v["pass_at_1_num"] / n if n else 0.0,
-            "pass_at_5": v["pass_at_5_num"] / n if n else 0.0,
-        })
-    return {"long": long_rows}
+    n_total = len(per_task_best)
+    n_pass = sum(1 for s in per_task_best.values() if s >= threshold)
+    overall = n_pass / n_total
+
+    by_cat_total: dict[str, int] = defaultdict(int)
+    by_cat_pass: dict[str, int] = defaultdict(int)
+    for task, score in per_task_best.items():
+        cat = per_task_cat[task]
+        by_cat_total[cat] += 1
+        if score >= threshold:
+            by_cat_pass[cat] += 1
+    per_cat = {c: by_cat_pass[c] / by_cat_total[c] if by_cat_total[c] else 0.0
+               for c in by_cat_total}
+    return overall, per_cat
 
 
-def _write_csv(long_rows: list[dict[str, Any]], path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    cols = ["backend", "adapter", "category", "n_tasks", "pass_at_1", "pass_at_5"]
-    with path.open("w", encoding="utf-8", newline="") as h:
-        w = csv.DictWriter(h, fieldnames=cols)
-        w.writeheader()
-        for r in long_rows:
-            w.writerow({k: r.get(k, "") for k in cols})
-
-
-def _write_headline_md(long_rows: list[dict[str, Any]], path: Path) -> None:
-    # Pivot: backend × category → {baseline:(p1,p5), cua:(p1,p5)}
-    pivot: dict[tuple[str, str], dict[str, dict[str, float]]] = defaultdict(dict)
-    for r in long_rows:
-        pivot[(r["backend"], r["category"])][r["adapter"]] = {
-            "pass_at_1": r["pass_at_1"],
-            "pass_at_5": r["pass_at_5"],
-            "n_tasks": r["n_tasks"],
-        }
-    backends = sorted({b for b, _ in pivot})
-    cats = sorted({c for _, c in pivot})
-
-    lines: list[str] = []
-    lines.append("# CUA SFT 4×5 headline\n")
-    lines.append(f"_Threshold for pass: score ≥ {PASS_THRESHOLD}_\n")
-
-    for k_label in ("pass_at_1", "pass_at_5"):
-        lines.append(f"## {k_label.replace('_', ' ').title()}\n")
-        header = ["model"] + [f"{c} ({CATEGORY_LABELS.get(c, '?')})" for c in cats]
-        lines.append("| " + " | ".join(header) + " |")
-        lines.append("|" + "|".join(["---"] * len(header)) + "|")
-        for b in backends:
-            row = [b]
-            for c in cats:
-                cell = pivot.get((b, c), {})
-                base = (cell.get("baseline") or {}).get(k_label)
-                cua = (cell.get("cua") or {}).get(k_label)
-                if base is None and cua is None:
-                    row.append("—")
-                    continue
-                base_s = f"{base:.2f}" if base is not None else "—"
-                cua_s = f"{cua:.2f}" if cua is not None else "—"
-                lift = ""
-                if base is not None and cua is not None and base > 0:
-                    rel = (cua - base) / base
-                    bold_open = "**" if rel >= 0.15 else ""
-                    bold_close = "**" if rel >= 0.15 else ""
-                    lift = f" {bold_open}({rel:+.0%}){bold_close}"
-                elif cua is not None and (base is None or base == 0):
-                    if cua > 0:
-                        lift = " (∞)"
-                row.append(f"{base_s} → {cua_s}{lift}")
-            lines.append("| " + " | ".join(row) + " |")
-        lines.append("")
-
-    lines.append("## Notes\n")
-    lines.append("- Cells render as `baseline → finetuned (relative lift)`. Bold cells exceed +15%.\n")
-    lines.append("- Empty cells = no held-out tasks in that category for the given model adapter.\n")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+def _format_row(name: str, overall: float, per_cat: dict[str, float], cats: list[str]) -> str:
+    cells = [f"{name:<28s}", f"{overall*100:6.1f}%"]
+    for c in cats:
+        if c in per_cat:
+            cells.append(f"{per_cat[c]*100:5.1f}%")
+        else:
+            cells.append("   —  ")
+    return "  ".join(cells)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Aggregate eval results into the headline table")
+    parser = argparse.ArgumentParser(description="Aggregate browser-eval results across models")
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS)
-    parser.add_argument("--categories", type=Path, default=DEFAULT_CATEGORIES)
-    parser.add_argument("--out-csv", type=Path, default=None)
-    parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument("--pass-threshold", type=float, default=1.0,
+                        help="A task is 'passed' if best score across attempts ≥ this. Default 1.0.")
+    parser.add_argument("--adapter", default=None,
+                        help="Only aggregate this adapter (e.g. 'baseline' or 'cua'). Default all.")
+    parser.add_argument("--csv", type=Path, default=None,
+                        help="Where to write CSV. Default: <results-dir>/_aggregate.csv")
+    parser.add_argument("--json", dest="json_out", type=Path, default=None,
+                        help="Where to write JSON. Default: <results-dir>/_aggregate.json")
+    parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    out_csv = args.out_csv or args.results_dir / "category_breakdown.csv"
-    out_md = args.out_md or args.results_dir / "headline.md"
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
+        level=logging.DEBUG if args.verbose else logging.INFO,
+    )
 
-    rows = _walk_results(args.results_dir)
-    if not rows:
-        print("No result.json files found under", args.results_dir, file=sys.stderr)
-        # Still emit empty placeholders so downstream tooling has stable paths
-        out_csv.parent.mkdir(parents=True, exist_ok=True)
-        out_csv.write_text("backend,adapter,category,n_tasks,pass_at_1,pass_at_5\n", encoding="utf-8")
-        out_md.write_text("# CUA SFT headline\n\n_(no results yet)_\n", encoding="utf-8")
-        return 0
+    if not args.results_dir.exists():
+        print(f"ERROR: results-dir not found: {args.results_dir}", file=sys.stderr)
+        return 1
 
-    categories = _load_categories(args.categories)
-    agg = _aggregate(rows, categories)
-    _write_csv(agg["long"], out_csv)
-    _write_headline_md(agg["long"], out_md)
-    print(json.dumps({
-        "n_attempt_rows": len(rows),
-        "n_aggregated_rows": len(agg["long"]),
-        "csv": str(out_csv),
-        "md": str(out_md),
-    }, indent=2))
+    summaries = _read_summaries(args.results_dir, args.adapter)
+    if not summaries:
+        print(f"ERROR: no _summary.jsonl files found under {args.results_dir}", file=sys.stderr)
+        return 1
+
+    seen_cats: set[str] = set()
+    aggregate: dict[str, Any] = {
+        "pass_threshold": args.pass_threshold,
+        "results": [],
+    }
+    for (backend, adapter), rows in summaries.items():
+        for r in rows:
+            if r.get("category"):
+                seen_cats.add(r["category"])
+
+    cats_in_order = [c for c in CATEGORY_ORDER if c in seen_cats]
+    cats_extras = sorted(c for c in seen_cats if c not in CATEGORY_ORDER)
+    cats_all = cats_in_order + cats_extras
+
+    header = f"{'Model / Adapter':<28s}  {'Overall':>7s}  " + "  ".join(f"{c:>6s}" for c in cats_all)
+    sep = "-" * len(header)
+    print()
+    print(f"pass@k @ threshold ≥ {args.pass_threshold}")
+    print(header)
+    print(sep)
+
+    for (backend, adapter), rows in sorted(summaries.items()):
+        overall, per_cat = _pass_at_k(rows, args.pass_threshold)
+        label = f"{backend}/{adapter}"
+        print(_format_row(label, overall, per_cat, cats_all))
+
+        n_tasks = len({r.get("task") for r in rows if r.get("task")})
+        n_attempts = len(rows)
+        parse_fail = sum(1 for r in rows if isinstance(r.get("error"), str)
+                         and "parse" in str(r["error"]).lower())
+        errored = sum(1 for r in rows if r.get("error"))
+        aggregate["results"].append({
+            "backend": backend,
+            "adapter": adapter,
+            "overall_pass_at_k": overall,
+            "per_category": per_cat,
+            "n_tasks": n_tasks,
+            "n_attempts": n_attempts,
+            "n_errored_attempts": errored,
+            "n_parse_failures": parse_fail,
+        })
+
+    print(sep)
+    print("(— = no tasks for that category in this run)")
+
+    csv_path = args.csv or (args.results_dir / "_aggregate.csv")
+    with csv_path.open("w", newline="", encoding="utf-8") as h:
+        writer = csv.writer(h)
+        writer.writerow(["backend", "adapter", "overall_pass_at_k"] + cats_all
+                        + ["n_tasks", "n_attempts", "n_errored", "n_parse_failures"])
+        for row in aggregate["results"]:
+            writer.writerow([
+                row["backend"],
+                row["adapter"],
+                f"{row['overall_pass_at_k']:.4f}",
+                *[f"{row['per_category'].get(c, 0.0):.4f}" if c in row["per_category"] else ""
+                  for c in cats_all],
+                row["n_tasks"],
+                row["n_attempts"],
+                row["n_errored_attempts"],
+                row["n_parse_failures"],
+            ])
+
+    json_path = args.json_out or (args.results_dir / "_aggregate.json")
+    with json_path.open("w", encoding="utf-8") as h:
+        json.dump(aggregate, h, indent=2)
+
+    print()
+    print(f"Wrote CSV : {csv_path}")
+    print(f"Wrote JSON: {json_path}")
+
+    print()
+    print("Per-task failure modes (only attempts that errored or scored 0):")
+    for (backend, adapter), rows in sorted(summaries.items()):
+        bad = [r for r in rows if float(r.get("score", 0) or 0) == 0]
+        if not bad:
+            continue
+        print(f"  {backend}/{adapter}: {len(bad)} zero-score attempts")
+        per_task_zero: dict[str, int] = defaultdict(int)
+        for r in bad:
+            per_task_zero[r.get("task", "?")] += 1
+        for t, n in sorted(per_task_zero.items(), key=lambda kv: -kv[1])[:8]:
+            print(f"    {n}× {t}")
+
     return 0
 
 

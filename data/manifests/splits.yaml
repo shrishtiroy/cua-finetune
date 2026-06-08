@@ -1,13 +1,13 @@
 pass_threshold: 1.0
 thin_fallback: 0.8
 max_per_task: 3
-train_frac: 0.8
+train_frac: 0.7
 seed: 42
-n_train_tasks: 115
-n_test_tasks: 30
+require_yaml_for_test: true
+n_train_tasks: 121
+n_test_tasks: 24
 train_tasks:
 - allbirds-cart-total-socks-breezer-terraluxe
-- allbirds-new-arrivals-sole-colors
 - allbirds-rerun-clearance-white-shoe-pct
 - athena-authenticity-assessment
 - athena-hpi-to-signoff
@@ -16,14 +16,17 @@ train_tasks:
 - athena-recurring-booking-mei-chen
 - cambridge-beudo-most-energy-2024
 - cross-ref-chase-oakland-driver-history
+- cross-ref-fremont-drivers-prior-flags
 - cross-ref-repeat-driver-combined-wait
 - cross-ref-sfo-farthest-driver-rider-impact
+- desmos-strict-inequality-grid-count
+- difference_between_kirkcaldy_and_paisley
+- doordash-chipotle-delivery-eta
 - fed-reserve-unemployment-rate-difference-california-vs-texas
 - fleet-map-chase-center-high-risk
 - fleet-map-most-flagged-zone
 - fleet-map-sfo-pending-count
 - fleet-map-zone-with-highest-avg-discrepancy
-- gapminder-carbon-emissions-by-country
 - gapminder-climate-change-threat-argentina
 - gapminder-gdp-life-expectancy-1996
 - gapminder-gdp-per-employee-2024
@@ -32,44 +35,51 @@ train_tasks:
 - gapminder-religion-life-expectancy-gdp-crossover
 - gb-ca-city-of-imperial-community-development-t02-workflow-requirements
 - gb-ca-city-of-imperial-community-development-t03-workflow-requirements
+- gb-co-rio-blanco-county-t05-workflow-requirements
 - gb-de-new-castle-county-de-t01-workflow-requirements
 - gb-de-new-castle-county-de-t02-workflow-requirements
 - gb-de-new-castle-county-permits-inspections-t01-workflow-requirements
 - gb-il-piatt-county-il-t03-workflow-requirements
+- gb-la-beauregard-parish-police-jury-t03-workflow-requirements
 - gb-me-maine-lupc-northern-region-t01-workflow-requirements
 - gemini-zoom-smoke
 - gps-spoof-device-earnings-investigation
+- gps-spoof-highest-surge-rider-impact
 - gps-spoof-repeat-offender-total-discrepancy
 - gps-spoof-sfo-cluster-driver-count
 - happymap-embedded-chart-interpretation
 - happymap-story-tour-synthesis
 - hard-map-pan-escalated-across-zones
+- hard-map-pan-south-san-jose-driver
 - kanboard-due-date-bug
 - karthikeya-bar-vs-line-chart-cross-reference-day
 - karthikeya-box-laser-cut-dimensions-vs-screen-count
-- karthikeya-data-table-vs-bar-chart-verification
+- karthikeya-cross-project-award-and-duration
+- karthikeya-east-coast-map-dot-color-cluster-counting
+- karthikeya-east-coast-map-statistics-reading
 - karthikeya-keychain-symbol-decode-cross-reference
 - karthikeya-line-graph-estimate-unlabeled-peak-value
 - karthikeya-navigate-to-east-coast-vessel-insights
 - karthikeya-screens-aug-acrylic-card-text-reading
 - karthikeya-screens-aug-data-table-app-on-specific-day
 - karthikeya-screens-aug-ideation-materials-comparison
+- karthikeya-screens-aug-line-graph-crossing-event
 - karthikeya-screens-aug-stacked-bar-lowest-day-annotation
 - last-to-100m
 - last_to_100m
+- linkding-tags-stripped
 - nasa-satellites-jul-2009
 - nasa-spacecraft-second-closest-pair
 - ncase-trust-copycat-threshold-simulation
 - noaa-slr-miami-highest-dry-level
+- north_norfolk_takeaways_and_sandwich_shops_failed_inspections
 - peoplemovin-sort-migrants-high-range
 - peoplemovin-sort-migrants-mid-range
+- pydocs-async-context-dunder
 - pydocs-class-getitem-purpose
-- pydocs-find-getloadavg
 - pydocs-genericalias-classgetitem
 - pydocs-memoryview-release
 - pydocs-modindex-z-modules
-- pydocs-ordereddict-move-to-end
-- pydocs-os-urandom-pep
 - pydocs-reduce-moved
 - pydocs-sched-setparam-vs-getparam
 - pydocs-sorted-stability
@@ -81,30 +91,30 @@ train_tasks:
 - reuters-insect-species-sum
 - reuters-insect-third-most-assessed
 - rhythm-of-food-herbs-spices-summer-popularity
+- rhythm-of-food-peach-least-searched-season
+- sf-temp-housing-may-june
+- speedrun-oot-g7-absence
+- stellarium-web-visibility-comparison
 - stripe-ceo-reviewed
 - stripe-press-efficiency-author-cross-reference
 - stripe-press-second-most-retailer-options
 - sts-dense-countries
-- sts-zero-pop
-- task_e1
+- submarine-cable-map-pacific-junction-cables
 - task_e104
-- task_e108
 - task_e37
 - task_e39
 - task_e44
-- task_e46
-- task_e47
 - task_e48
-- task_e51
+- task_e50
 - task_e70
 - task_e71
 - task_e84
-- task_e87
 - task_e91
 - task_e92
+- task_e96
 - text-entry-calibration
 - thatsedu-bubble-ratio
-- thatsedu-social-contribution-dominance
+- thatsedu-cost-leader-reversal
 - thatsedu-transfers-effect-scarcity
 - top-migrant-destination-barbados
 - top_migrant_destination_jamaica
@@ -117,41 +127,32 @@ train_tasks:
 - usaspending-cellco-vs-eldery-handicapped-fund
 - usaspending-commodity-assistance-program-outlays
 - wordle-archive-11
-- worldbank-sdg-poverty-fiji-maldives
-- worldshapin-india-most-distorted-axis-identification
 - worldshapin-russia-shape-explosion-1995
-- worldshapin-south-africa-collapsing-axis
 test_tasks:
-- cross-ref-fremont-drivers-prior-flags
-- desmos-strict-inequality-grid-count
-- difference_between_kirkcaldy_and_paisley
-- doordash-chipotle-delivery-eta
-- gb-co-rio-blanco-county-t05-workflow-requirements
-- gb-la-beauregard-parish-police-jury-t03-workflow-requirements
-- gps-spoof-highest-surge-rider-impact
-- hard-map-pan-south-san-jose-driver
-- karthikeya-cross-project-award-and-duration
-- karthikeya-east-coast-map-dot-color-cluster-counting
-- karthikeya-east-coast-map-statistics-reading
-- karthikeya-screens-aug-line-graph-crossing-event
+- allbirds-new-arrivals-sole-colors
+- gapminder-carbon-emissions-by-country
+- karthikeya-data-table-vs-bar-chart-verification
 - karthikeya-three-project-dataviz-tools-comparison
-- linkding-tags-stripped
-- north_norfolk_takeaways_and_sandwich_shops_failed_inspections
 - peoplemovin-sort-migrants-low-range
 - portillos-just-moved-west-coast-im
-- pydocs-async-context-dunder
+- pydocs-find-getloadavg
 - pydocs-modindex-tkinter-count
+- pydocs-ordereddict-move-to-end
 - pydocs-os-sched-policy
+- pydocs-os-urandom-pep
 - reuters-insect-arachnid-assessed-pct
-- rhythm-of-food-peach-least-searched-season
-- sf-temp-housing-may-june
-- speedrun-oot-g7-absence
-- stellarium-web-visibility-comparison
-- submarine-cable-map-pacific-junction-cables
-- task_e50
+- sts-zero-pop
+- task_e1
+- task_e108
+- task_e46
+- task_e47
+- task_e51
 - task_e66
-- task_e96
-- thatsedu-cost-leader-reversal
+- task_e87
+- thatsedu-social-contribution-dominance
+- worldbank-sdg-poverty-fiji-maldives
+- worldshapin-india-most-distorted-axis-identification
+- worldshapin-south-africa-collapsing-axis
 dropped_tasks:
 - _old
 - allbirds-mens-sneakers-avg-discount
@@ -246,3 +247,47 @@ dropped_tasks:
 - worldshapin-japan-axis-reaching-boundary
 - worldshapin-norway-axis-reaching-boundary
 thin_fallback_categories: []
+yaml_eligibility:
+  yaml_constraint_active: true
+  n_yaml_eligible_total: 298
+  eligible_per_category:
+    C4_shopping: 7
+    C99_other: 28
+    C2_structured: 7
+    C1_ui_nav: 24
+    C5_government: 1
+    C3_docs: 15
+  forced_to_train_count: 63
+  forced_to_train_per_category:
+    C4_shopping: 1
+    C99_other: 26
+    C2_structured: 6
+    C1_ui_nav: 20
+    C5_government: 10
+  forced_to_train_sample:
+    C4_shopping:
+    - doordash-chipotle-delivery-eta
+    C99_other:
+    - athena-authenticity-assessment
+    - athena-hpi-to-signoff
+    - athena-ob-hpi-signoff-opus
+    - athena-ob-preeclampsia-labs-hpi
+    - gemini-zoom-smoke
+    C2_structured:
+    - cambridge-beudo-most-energy-2024
+    - cross-ref-chase-oakland-driver-history
+    - cross-ref-fremont-drivers-prior-flags
+    - cross-ref-repeat-driver-combined-wait
+    - cross-ref-sfo-farthest-driver-rider-impact
+    C1_ui_nav:
+    - desmos-strict-inequality-grid-count
+    - fleet-map-chase-center-high-risk
+    - fleet-map-most-flagged-zone
+    - fleet-map-sfo-pending-count
+    - fleet-map-zone-with-highest-avg-discrepancy
+    C5_government:
+    - gb-ca-city-of-imperial-community-development-t02-workflow-requirements
+    - gb-ca-city-of-imperial-community-development-t03-workflow-requirements
+    - gb-co-rio-blanco-county-t05-workflow-requirements
+    - gb-de-new-castle-county-de-t01-workflow-requirements
+    - gb-de-new-castle-county-de-t02-workflow-requirements

@@ -46,12 +46,26 @@ import yaml
 logger = logging.getLogger("atif_to_swift")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SIBLINGS = REPO_ROOT.parent
 DEFAULT_MANIFEST = REPO_ROOT / "data" / "manifests" / "pulled_trajectories.jsonl"
 DEFAULT_CATEGORIES = REPO_ROOT / "data" / "manifests" / "categories.yaml"
 DEFAULT_OUT_DIR = REPO_ROOT / "data" / "cua_sft"
 DEFAULT_SPLITS = REPO_ROOT / "data" / "manifests" / "splits.yaml"
 DEFAULT_HELDOUT = REPO_ROOT / "data" / "manifests" / "held_out_tasks.yaml"
 DEFAULT_STATS = REPO_ROOT / "data" / "manifests" / "dataset_stats.yaml"
+
+# Sibling repos that may contain task YAML definitions. A task without a YAML
+# anywhere in these roots cannot be browser-evaluated (no start URL / rubric),
+# so it is forced into the training split.
+DEFAULT_TASK_YAML_ROOTS = [
+    SIBLINGS / "Dillinger" / "tasks",
+    SIBLINGS / "Dillinger" / "QA",
+    SIBLINGS / "Dillinger" / "environments",
+    SIBLINGS / "Dillinger" / "environments-realworld",
+    SIBLINGS / "project-dojo" / "staging",
+    SIBLINGS / "liveweb" / "tasks",
+    SIBLINGS / "qa-cua-bench" / "tasks",
+]
 
 DEFAULT_CATEGORY = "C99_other"
 DROP_CATEGORY = "C_drop_non_browser"
@@ -101,6 +115,43 @@ def _agent_rank(agent: str) -> int:
         return AGENT_PRIORITY.index(agent)
     except ValueError:
         return len(AGENT_PRIORITY) + 1
+
+
+def _load_yaml_eligible_tasks(roots: Iterable[Path]) -> set[str]:
+    """Scan the given sibling repo roots and return every task name that has a
+    YAML definition somewhere. These are the tasks that browser-eval can run
+    against (a YAML supplies start URL, success criteria, rubric).
+    """
+    out: set[str] = set()
+    for root in roots:
+        if not root.exists():
+            continue
+        for path in list(root.rglob("*.yaml")) + list(root.rglob("*.yml")):
+            if path.name.endswith(".bak"):
+                continue
+            try:
+                with path.open("r", encoding="utf-8") as h:
+                    data = yaml.safe_load(h)
+            except (yaml.YAMLError, OSError):
+                continue
+            if isinstance(data, dict):
+                name = data.get("name")
+                if isinstance(name, str) and name.strip():
+                    out.add(name.strip())
+                tasks = data.get("tasks")
+                if isinstance(tasks, list):
+                    for t in tasks:
+                        if isinstance(t, dict):
+                            n = t.get("name")
+                            if isinstance(n, str) and n.strip():
+                                out.add(n.strip())
+            elif isinstance(data, list):
+                for t in data:
+                    if isinstance(t, dict):
+                        n = t.get("name")
+                        if isinstance(n, str) and n.strip():
+                            out.add(n.strip())
+    return out
 
 
 def _to_trajectory(row: dict[str, Any], categories: dict[str, str]) -> Trajectory | None:
@@ -196,7 +247,17 @@ def stratified_split(
     trajectories: list[Trajectory],
     train_frac: float,
     rng: random.Random,
-) -> tuple[set[str], set[str]]:
+    yaml_eligible: set[str] | None = None,
+) -> tuple[set[str], set[str], dict[str, Any]]:
+    """Task-level stratified split with an optional YAML-eligibility constraint.
+
+    If ``yaml_eligible`` is provided, tasks NOT in that set are forced into
+    train (they cannot be browser-evaluated). Tasks in the set go through the
+    normal per-category 1-train_frac split.
+
+    Returns ``(train_tasks, test_tasks, info)`` where ``info`` summarizes how
+    many tasks per category were forced to train due to missing YAML.
+    """
     by_cat: dict[str, list[str]] = defaultdict(list)
     seen: set[str] = set()
     for t in trajectories:
@@ -207,15 +268,40 @@ def stratified_split(
 
     train_tasks: set[str] = set()
     test_tasks: set[str] = set()
-    for _cat, tasks in by_cat.items():
-        rng.shuffle(tasks)
-        if len(tasks) == 1:
-            train_tasks.update(tasks)
+    forced_to_train: dict[str, list[str]] = defaultdict(list)
+    eligible_per_cat: dict[str, int] = {}
+
+    for cat, tasks in by_cat.items():
+        if yaml_eligible is None:
+            eligible = list(tasks)
+            ineligible: list[str] = []
+        else:
+            eligible = [t for t in tasks if t in yaml_eligible]
+            ineligible = [t for t in tasks if t not in yaml_eligible]
+        eligible_per_cat[cat] = len(eligible)
+        if ineligible:
+            train_tasks.update(ineligible)
+            forced_to_train[cat].extend(sorted(ineligible))
+
+        rng.shuffle(eligible)
+        if len(eligible) == 0:
             continue
-        n_test = max(1, int(round(len(tasks) * (1 - train_frac))))
-        test_tasks.update(tasks[:n_test])
-        train_tasks.update(tasks[n_test:])
-    return train_tasks, test_tasks
+        if len(eligible) == 1:
+            train_tasks.update(eligible)
+            continue
+        n_test = max(1, int(round(len(eligible) * (1 - train_frac))))
+        test_tasks.update(eligible[:n_test])
+        train_tasks.update(eligible[n_test:])
+
+    info = {
+        "yaml_constraint_active": yaml_eligible is not None,
+        "n_yaml_eligible_total": len(yaml_eligible) if yaml_eligible is not None else None,
+        "eligible_per_category": dict(eligible_per_cat),
+        "forced_to_train_count": sum(len(v) for v in forced_to_train.values()),
+        "forced_to_train_per_category": {k: len(v) for k, v in forced_to_train.items()},
+        "forced_to_train_sample": {k: v[:5] for k, v in forced_to_train.items()},
+    }
+    return train_tasks, test_tasks, info
 
 
 def _resolve_screenshot(traj_dir: Path, ref: str | None) -> Path | None:
@@ -420,8 +506,32 @@ def main() -> int:
     parser.add_argument("--train-frac", type=float, default=0.8)
     parser.add_argument("--heldout-per-category", type=int, default=10)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--require-yaml-for-test",
+        action="store_true",
+        default=True,
+        help="Only place tasks with a YAML definition in the test split (so all test tasks "
+             "are browser-evalable). Tasks without a YAML are forced into train. Default ON.",
+    )
+    parser.add_argument(
+        "--no-require-yaml-for-test",
+        dest="require_yaml_for_test",
+        action="store_false",
+        help="Disable the YAML-eligibility constraint (legacy behaviour).",
+    )
+    parser.add_argument(
+        "--task-yaml-root",
+        type=Path,
+        action="append",
+        default=None,
+        help="Sibling repo dir to scan for task YAMLs. Repeatable. "
+             "Defaults: Dillinger/{tasks,QA,environments,environments-realworld}, "
+             "project-dojo/staging, liveweb/tasks, qa-cua-bench/tasks.",
+    )
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
+    if args.task_yaml_root is None:
+        args.task_yaml_root = list(DEFAULT_TASK_YAML_ROOTS)
 
     logging.basicConfig(
         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
@@ -447,8 +557,20 @@ def main() -> int:
                 len(info["dropped_tasks"]), info["thin_fallback_categories"])
 
     rng = random.Random(args.seed)
-    train_tasks, test_tasks = stratified_split(selected, args.train_frac, rng)
-    logger.info("Task-level split: train=%d test=%d", len(train_tasks), len(test_tasks))
+    yaml_eligible: set[str] | None = None
+    if args.require_yaml_for_test:
+        yaml_eligible = _load_yaml_eligible_tasks(args.task_yaml_root)
+        logger.info("Loaded %d YAML-eligible task names from %d root(s); "
+                    "tasks without a YAML will be forced into train.",
+                    len(yaml_eligible), len(args.task_yaml_root))
+    train_tasks, test_tasks, split_info = stratified_split(
+        selected, args.train_frac, rng, yaml_eligible=yaml_eligible,
+    )
+    logger.info("Task-level split: train=%d test=%d (forced_to_train=%d)",
+                len(train_tasks), len(test_tasks), split_info["forced_to_train_count"])
+    if split_info["forced_to_train_count"]:
+        for cat, n in sorted(split_info["forced_to_train_per_category"].items()):
+            logger.info("  forced_to_train[%s] = %d", cat, n)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     train_path = args.out_dir / "train.jsonl"
@@ -490,12 +612,14 @@ def main() -> int:
         "max_per_task": args.max_per_task,
         "train_frac": args.train_frac,
         "seed": args.seed,
+        "require_yaml_for_test": args.require_yaml_for_test,
         "n_train_tasks": len(train_tasks),
         "n_test_tasks": len(test_tasks),
         "train_tasks": sorted(train_tasks),
         "test_tasks": sorted(test_tasks),
         "dropped_tasks": sorted(info["dropped_tasks"]),
         "thin_fallback_categories": list(info["thin_fallback_categories"]),
+        "yaml_eligibility": split_info,
     }
     with args.splits_out.open("w", encoding="utf-8") as h:
         yaml.safe_dump(splits_payload, h, sort_keys=False)

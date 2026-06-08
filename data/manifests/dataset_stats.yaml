@@ -1,26 +1,26 @@
-n_train_examples: 6980
-n_test_examples: 1524
-n_train_tasks: 115
-n_test_tasks: 30
+n_train_examples: 7858
+n_test_examples: 646
+n_train_tasks: 121
+n_test_tasks: 24
 examples_per_category:
   C1_ui_nav:
-    train: 2147
-    test: 467
+    train: 2265
+    test: 349
   C2_structured:
-    train: 728
-    test: 93
+    train: 794
+    test: 27
   C3_docs:
-    train: 231
-    test: 114
+    train: 320
+    test: 25
   C4_shopping:
-    train: 517
-    test: 86
+    train: 533
+    test: 70
   C5_government:
-    train: 1137
-    test: 260
+    train: 1397
+    test: 0
   C99_other:
-    train: 2220
-    test: 504
+    train: 2549
+    test: 175
 mean_steps_per_trajectory: 41.28
 dropped_task_count: 92
 thin_fallback_categories: []
@@ -28,5 +28,5 @@ skipped_examples_no_image: 0
 pass_threshold: 1.0
 thin_fallback: 0.8
 max_per_task: 3
-train_frac: 0.8
+train_frac: 0.7
 seed: 42

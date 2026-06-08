@@ -24,14 +24,29 @@ MODEL="${1:?MODEL required}"
 ADAPTER_PATH="${2:-}"
 PORT="${3:-8000}"
 
+# Auto-activate the cua-finetune venv if not already inside one. Without this,
+# `pip install --user vllm` ends up co-installed with system scipy/sklearn that
+# were apt-compiled against numpy 1.x — and we hit numpy 2.x ABI breaks like
+# "ImportError: cannot import name 'Inf' from 'numpy'" or
+# "ValueError: numpy.dtype size changed". The venv is isolated from
+# /usr/lib/python3/dist-packages so it dodges those collisions entirely.
+VENV_DIR="${HOME}/cua-finetune/.venv"
+if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+  if [[ -f "${VENV_DIR}/bin/activate" ]]; then
+    echo "Activating ${VENV_DIR}"
+    # shellcheck disable=SC1091
+    source "${VENV_DIR}/bin/activate"
+  else
+    echo "WARN: ${VENV_DIR} not found. Running with system Python — expect" >&2
+    echo "      numpy/scipy/sklearn ABI errors. Run lambda_setup.sh first." >&2
+  fi
+fi
+
 # Preflight: confirm vllm is on PATH inside the active venv. ms-swift's [llm]
 # extras *may or may not* pull in vllm depending on version, so we don't rely
 # on it. Install on-demand instead of failing later inside the model load.
-# Note: vllm has its own torch pinning. Recent vllm (>= 0.7) wants torch 2.6,
-# matching what lambda_setup.sh installs. If the install changes torch, the
-# warning is loud — we don't try to be clever about reverting it.
 if ! command -v vllm >/dev/null 2>&1; then
-  echo "vllm CLI not found in PATH. Installing into the active venv..."
+  echo "vllm CLI not found in venv. Installing..."
   pip install --no-cache-dir "vllm>=0.7.0" || {
     echo "ERROR: vllm install failed. Possible causes:" >&2
     echo "       1. torch version mismatch (vllm wants torch 2.6, lambda_setup pins 2.6 — should be fine)" >&2

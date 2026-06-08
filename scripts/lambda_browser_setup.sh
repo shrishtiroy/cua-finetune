@@ -9,14 +9,17 @@
 #   1. Verifies Docker is installed (Lambda Stack ships with it on most images).
 #   2. Installs Python 3.11 (Dillinger requires >=3.11; Lambda's default is 3.10).
 #   3. Installs `uv` (Dillinger uses uv for env management).
-#   4. Clones github.com/refreshdotdev/Dillinger to ~/Dillinger if absent, else pulls.
-#   5. uv sync inside Dillinger (installs conduit + rubric + tzafon + playwright).
-#   6. uv run python -m playwright install chromium (host-side; the runtime
+#   4. Installs nodejs + npm (Dillinger's run_conduit.sh has `require_cmd npm`
+#      at the top, which fires even when CONDUIT_SKIP_SETUP=1 is set — so we
+#      need npm on PATH even if we never actually build the viewer).
+#   5. Clones github.com/refreshdotdev/Dillinger to ~/Dillinger if absent, else pulls.
+#   6. uv sync inside Dillinger (installs conduit + rubric + tzafon + playwright).
+#   7. uv run python -m playwright install chromium (host-side; the runtime
 #      container has its own copy baked in).
-#   7. docker build -t conduit-runtime ~/Dillinger  (~5-10 min, ~3GB).
-#   8. Verifies ~/Dillinger/.env exists and has at least LITELLM_API_KEY +
-#      ANTHROPIC_API_KEY (needed for grading judge AND tzafon smoke test).
-#   9. Smoke-imports conduit + verifies the runtime container can boot to /health.
+#   8. docker build -t conduit-runtime ~/Dillinger  (~5-10 min, ~3GB).
+#   9. Verifies ~/Dillinger/.env exists and has at least LITELLM_API_KEY +
+#      ANTHROPIC_API_KEY (needed for grading judge AND Anthropic-direct Opus smoke test).
+#  10. Smoke-imports conduit + verifies the runtime container can boot to /health.
 #
 # Pre-requisites you must do BEFORE running this:
 #   - rsync ~/refresh/repos/Dillinger/.env from your Mac to Lambda:~/Dillinger/.env
@@ -32,7 +35,7 @@ HOME_DIR="${HOME}"
 DILLINGER_DIR="${HOME_DIR}/Dillinger"
 CUA_REPO="${HOME_DIR}/cua-finetune"
 
-echo "==> [0/9] Sanity checks"
+echo "==> [0/10] Sanity checks"
 if ! command -v nvidia-smi >/dev/null; then
   echo "ERROR: nvidia-smi not found. Run this on the Lambda GPU box." >&2
   exit 2
@@ -43,7 +46,7 @@ if [[ ! -d "${CUA_REPO}" ]]; then
 fi
 
 # ---- 1. docker --------------------------------------------------------------
-echo "==> [1/9] Docker"
+echo "==> [1/10] Docker"
 if ! command -v docker >/dev/null; then
   echo "Installing Docker..."
   sudo apt-get update -qq
@@ -64,7 +67,7 @@ echo "  using: ${DOCKER_CMD}"
 ${DOCKER_CMD} version --format '{{.Server.Version}}' || { echo "ERROR: docker not working"; exit 2; }
 
 # ---- 2. python 3.11 ---------------------------------------------------------
-echo "==> [2/9] Python 3.11"
+echo "==> [2/10] Python 3.11"
 if ! command -v python3.11 >/dev/null; then
   echo "Installing python3.11 from deadsnakes..."
   sudo add-apt-repository -y ppa:deadsnakes/ppa
@@ -74,7 +77,7 @@ fi
 python3.11 --version
 
 # ---- 3. uv ------------------------------------------------------------------
-echo "==> [3/9] uv (Python pkg manager)"
+echo "==> [3/10] uv (Python pkg manager)"
 if ! command -v uv >/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
   # uv installer puts it in ~/.local/bin
@@ -82,8 +85,21 @@ if ! command -v uv >/dev/null; then
 fi
 uv --version
 
-# ---- 4. Dillinger checkout --------------------------------------------------
-echo "==> [4/9] Dillinger checkout"
+# ---- 4. nodejs + npm --------------------------------------------------------
+# Dillinger's run_conduit.sh does `require_cmd npm` at the top, before checking
+# CONDUIT_SKIP_SETUP. So npm must be on PATH even if the smoke script sets
+# CONDUIT_SKIP_SETUP=1 to skip the actual viewer build. The viewer build itself
+# is skipped during eval runs — we only need the binary to satisfy the gate.
+echo "==> [4/10] nodejs + npm (satisfies run_conduit.sh's require_cmd npm)"
+if ! command -v npm >/dev/null; then
+  sudo apt-get update -qq
+  sudo apt-get install -y -qq nodejs npm
+fi
+node --version
+npm --version
+
+# ---- 5. Dillinger checkout --------------------------------------------------
+echo "==> [5/10] Dillinger checkout"
 if [[ ! -d "${DILLINGER_DIR}" ]]; then
   echo "  ${DILLINGER_DIR} not found. Either:"
   echo "    a) rsync your local Dillinger from your Mac, OR"
@@ -97,26 +113,26 @@ else
     echo "  (git fetch skipped — auth not set up; rsync'd state is fine for eval)"
 fi
 
-# ---- 5. uv sync -------------------------------------------------------------
-echo "==> [5/9] uv sync (installs conduit + deps)"
+# ---- 6. uv sync -------------------------------------------------------------
+echo "==> [6/10] uv sync (installs conduit + deps)"
 cd "${DILLINGER_DIR}"
 uv sync
 
-# ---- 6. playwright (host-side, optional) ------------------------------------
-echo "==> [6/9] Playwright host-side (optional; runtime container has its own)"
+# ---- 7. playwright (host-side, optional) ------------------------------------
+echo "==> [7/10] Playwright host-side (optional; runtime container has its own)"
 uv run python -m playwright install chromium || \
   echo "  (playwright host install failed — non-fatal; runtime container has chromium baked in)"
 
-# ---- 7. docker build conduit-runtime ----------------------------------------
-echo "==> [7/9] docker build conduit-runtime (~5-10 min, ~3 GB)"
+# ---- 8. docker build conduit-runtime ----------------------------------------
+echo "==> [8/10] docker build conduit-runtime (~5-10 min, ~3 GB)"
 if ${DOCKER_CMD} image inspect conduit-runtime >/dev/null 2>&1; then
   echo "  conduit-runtime image already built. Use 'docker rmi conduit-runtime' to force rebuild."
 else
   ${DOCKER_CMD} build -t conduit-runtime "${DILLINGER_DIR}"
 fi
 
-# ---- 8. .env check ----------------------------------------------------------
-echo "==> [8/9] API keys"
+# ---- 9. .env check ----------------------------------------------------------
+echo "==> [9/10] API keys"
 if [[ ! -f "${DILLINGER_DIR}/.env" ]]; then
   echo "  ${DILLINGER_DIR}/.env is MISSING."
   echo "  Either rsync it from your Mac:"
@@ -124,9 +140,8 @@ if [[ ! -f "${DILLINGER_DIR}/.env" ]]; then
   echo "  ...or copy ${DILLINGER_DIR}/.env.example to .env and paste keys manually:"
   echo "    cp ${DILLINGER_DIR}/.env.example ${DILLINGER_DIR}/.env && nano ${DILLINGER_DIR}/.env"
   echo "  Required at minimum:"
-  echo "    LITELLM_API_KEY        (used by the grading judge)"
-  echo "    ANTHROPIC_API_KEY      (rubric judge backend)"
-  echo "    TZAFON_API_KEY         (only if you want the Tzafon smoke test)"
+  echo "    ANTHROPIC_API_KEY      (rubric judge backend + Anthropic-direct Opus smoke)"
+  echo "    LITELLM_API_KEY        (LiteLLM proxy key; used by eval baselines through the proxy)"
   exit 1
 fi
 miss=()
@@ -141,8 +156,8 @@ if (( ${#miss[@]} > 0 )); then
 fi
 echo "  ${DILLINGER_DIR}/.env present."
 
-# ---- 9. smoke-import conduit + boot runtime ---------------------------------
-echo "==> [9/9] Smoke-import conduit + boot runtime container"
+# ---- 10. smoke-import conduit + boot runtime --------------------------------
+echo "==> [10/10] Smoke-import conduit + boot runtime container"
 cd "${DILLINGER_DIR}"
 uv run python -c "
 from conduit.config import load_settings
@@ -186,8 +201,9 @@ echo "============================================================"
 echo "  Phase 3a setup complete."
 echo "============================================================"
 echo "  Next:"
-echo "    1) Smoke test the full eval loop with Tzafon backend (no model from us):"
-echo "       bash ~/cua-finetune/scripts/eval_browser_smoke_tzafon.sh"
+echo "    1) Smoke test the full eval loop with Claude Opus directly (no Tzafon, no us):"
+echo "       bash ~/cua-finetune/scripts/eval_browser_smoke_opus.sh"
+echo "       (alternative — Tzafon-backed smoke: scripts/eval_browser_smoke_tzafon.sh)"
 echo "    2) Then start vLLM and run baselines for our 3 candidate models:"
 echo "       bash ~/cua-finetune/scripts/serve_vllm.sh Qwen/Qwen3-VL-8B-Instruct '' 8000  # in tmux"
 echo "       bash ~/cua-finetune/scripts/eval_browser_baseline.sh qwen_vl_cua             # in another tmux"

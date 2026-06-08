@@ -85,10 +85,16 @@ uv --version
 # ---- 4. Dillinger checkout --------------------------------------------------
 echo "==> [4/9] Dillinger checkout"
 if [[ ! -d "${DILLINGER_DIR}" ]]; then
-  git clone https://github.com/refreshdotdev/Dillinger.git "${DILLINGER_DIR}"
+  echo "  ${DILLINGER_DIR} not found. Either:"
+  echo "    a) rsync your local Dillinger from your Mac, OR"
+  echo "    b) git clone (needs PAT/SSH; refreshdotdev/Dillinger is private)."
+  echo "  Aborting until ${DILLINGER_DIR} exists."
+  exit 2
 else
-  echo "  Dillinger already cloned at ${DILLINGER_DIR}"
-  (cd "${DILLINGER_DIR}" && git fetch origin && git status -sb)
+  echo "  Dillinger present at ${DILLINGER_DIR}"
+  # Try a courtesy fetch but don't fail the whole setup if auth isn't configured.
+  (cd "${DILLINGER_DIR}" && git fetch origin && git status -sb) || \
+    echo "  (git fetch skipped — auth not set up; rsync'd state is fine for eval)"
 fi
 
 # ---- 5. uv sync -------------------------------------------------------------

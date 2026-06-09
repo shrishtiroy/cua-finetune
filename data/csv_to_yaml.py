@@ -298,7 +298,10 @@ def main() -> int:
         spec = synthesize_one(rec)
         out_path = args.out_dir / f"{name}.yaml"
         with out_path.open("w", encoding="utf-8") as h:
-            yaml.safe_dump(spec, h, sort_keys=False, allow_unicode=True)
+            # conduit's task_loader.load_tasks() expects either a top-level
+            # list of task dicts OR a dict with a ``tasks:`` key. Wrap as a
+            # 1-element list so load_tasks doesn't silently return [].
+            yaml.safe_dump([spec], h, sort_keys=False, allow_unicode=True)
         n_rubric_items = len(spec["rubric"])
         total_weight = sum(int(it["w"]) for it in spec["rubric"])
         written.append({

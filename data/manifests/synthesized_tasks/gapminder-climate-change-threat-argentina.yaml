@@ -1,10 +1,10 @@
-name: gapminder-climate-change-threat-argentina
-url: https://www.gapminder.org/tools/#$chart-type=map&url=v2
-prompt: Using the Gapminder map and the correct filters, what percent of the Argentinian
-  population see climate change as a serious threat? How was this data collected?
-rubric:
-- r: States that 70.7% of the Argentinian population see climate change as a serious
-    threat
-  w: 50
-- r: Identifies that the data was collected via the Gallup World Poll
-  w: 50
+- name: gapminder-climate-change-threat-argentina
+  url: https://www.gapminder.org/tools/#$chart-type=map&url=v2
+  prompt: Using the Gapminder map and the correct filters, what percent of the Argentinian
+    population see climate change as a serious threat? How was this data collected?
+  rubric:
+  - r: States that 70.7% of the Argentinian population see climate change as a serious
+      threat
+    w: 50
+  - r: Identifies that the data was collected via the Gallup World Poll
+    w: 50

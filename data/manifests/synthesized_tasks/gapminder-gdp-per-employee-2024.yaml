@@ -1,9 +1,9 @@
-name: gapminder-gdp-per-employee-2024
-url: https://www.gapminder.org/tools/#$chart-type=barrank&url=v2
-prompt: Using the Gapminder tools, find the country with the 8th largest population
-  in 2015. What was that country's GDP per employee in 2024?
-rubric:
-- r: Finds that the country with the 8th largest population in 2015 is Bangladesh
-  w: 10
-- r: States that Bangladesh's GDP per employee in 2024 is 4620
-  w: 90
+- name: gapminder-gdp-per-employee-2024
+  url: https://www.gapminder.org/tools/#$chart-type=barrank&url=v2
+  prompt: Using the Gapminder tools, find the country with the 8th largest population
+    in 2015. What was that country's GDP per employee in 2024?
+  rubric:
+  - r: Finds that the country with the 8th largest population in 2015 is Bangladesh
+    w: 10
+  - r: States that Bangladesh's GDP per employee in 2024 is 4620
+    w: 90

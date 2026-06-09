@@ -1,7 +1,7 @@
-name: rhythm-of-food-peach-least-searched-season
-url: https://rhythm-of-food.net/
-prompt: In which season is Peach least searched?
-rubric:
-- r: States that Peach is least searched in Winter.
-  w: 100
-archives: []
+- name: rhythm-of-food-peach-least-searched-season
+  url: https://rhythm-of-food.net/
+  prompt: In which season is Peach least searched?
+  rubric:
+  - r: States that Peach is least searched in Winter.
+    w: 100
+  archives: []

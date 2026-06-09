@@ -1,10 +1,10 @@
-name: task_e87
-url: https://docs.python.org/3
-prompt: Find the name of the helper function that is documented in the fileinput module
-  as a predefined option for the openhook parameter. This function is mentioned in
-  the module overview section when describing how to handle compressed files.
-rubric:
-- r: 'States: hook_compressed()'
-  w: 100
-archives:
-- docs-python-org-
+- name: task_e87
+  url: https://docs.python.org/3
+  prompt: Find the name of the helper function that is documented in the fileinput
+    module as a predefined option for the openhook parameter. This function is mentioned
+    in the module overview section when describing how to handle compressed files.
+  rubric:
+  - r: 'States: hook_compressed()'
+    w: 100
+  archives:
+  - docs-python-org-

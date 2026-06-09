@@ -1,20 +1,20 @@
-name: sts-zero-pop
-url: https://www.scrapethissite.com/pages/simple/
-prompt: 'Go to the Countries of the World page on Scrape This Site. Scroll through
-  all 250 countries and find every country that has a population of exactly 0. List
-  all of them along with their listed capital cities.
+- name: sts-zero-pop
+  url: https://www.scrapethissite.com/pages/simple/
+  prompt: 'Go to the Countries of the World page on Scrape This Site. Scroll through
+    all 250 countries and find every country that has a population of exactly 0. List
+    all of them along with their listed capital cities.
 
-  '
-rubric:
-- r: Must identify that there are exactly 4 countries with population 0.
-  w: 20
-- r: Must list U.S. Minor Outlying Islands.
-  w: 20
-- r: Must list Antarctica.
-  w: 20
-- r: Must list Bouvet Island.
-  w: 20
-- r: Must list Heard Island and McDonald Islands.
-  w: 20
-archives:
-- scrapethissite
+    '
+  rubric:
+  - r: Must identify that there are exactly 4 countries with population 0.
+    w: 20
+  - r: Must list U.S. Minor Outlying Islands.
+    w: 20
+  - r: Must list Antarctica.
+    w: 20
+  - r: Must list Bouvet Island.
+    w: 20
+  - r: Must list Heard Island and McDonald Islands.
+    w: 20
+  archives:
+  - scrapethissite

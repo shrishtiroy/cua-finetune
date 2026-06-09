@@ -1,84 +1,84 @@
-name: gb-de-new-castle-county-permits-inspections-t01-workflow-requirements
-url: https://www.newcastlede.gov/2503/Permits-Inspections
-prompt: Using the New Castle County Permits & Inspections site, Identify the complete
-  sequence of steps required to obtain a building permit for a new single-family home
-  construction, from initial application to final certificate of occupancy.
-rubric:
-- r: 'End-to-End Sequence Synthesis. The response must successfully capture the macro-level
-    sequence of the permit lifecycle, proving the model synthesized the disparate
-    guides on the county site. Required Elements:
+- name: gb-de-new-castle-county-permits-inspections-t01-workflow-requirements
+  url: https://www.newcastlede.gov/2503/Permits-Inspections
+  prompt: Using the New Castle County Permits & Inspections site, Identify the complete
+    sequence of steps required to obtain a building permit for a new single-family
+    home construction, from initial application to final certificate of occupancy.
+  rubric:
+  - r: 'End-to-End Sequence Synthesis. The response must successfully capture the
+      macro-level sequence of the permit lifecycle, proving the model synthesized
+      the disparate guides on the county site. Required Elements:
 
 
-    • Application Phase: Must mention utilizing the county''s digital portals (eApply,
-    ePlans, or eServices) to initiate the permit and upload documents.
+      • Application Phase: Must mention utilizing the county''s digital portals (eApply,
+      ePlans, or eServices) to initiate the permit and upload documents.
 
-    • Construction/Inspection Phase: Must mention that once the permit is issued,
-    construction begins and a sequence of mandatory inspections must be scheduled
-    and passed.
+      • Construction/Inspection Phase: Must mention that once the permit is issued,
+      construction begins and a sequence of mandatory inspections must be scheduled
+      and passed.
 
-    • Completion Phase: Must mention that passing the final inspection AND submitting
-    final documents results in the issuance of the Certificate of Occupancy (CO).'
-  w: 35
-- r: "Pre-Application & Upload Requirements. The response must describe the permit\
-    \ workflow and include at least three of the core steps listed below, in any order.\
-    \ The agent has flexibility in how much detail it provides for each item, but\
-    \ its description must not contradict the clarifications shown in parentheses.\n\
-    \n• Building Contractor License with Home Warranty Approval OR, if the owner-occupier\
-    \ is acting as their own contractor, the Owner-Occupier Affidavit and Owner-Occupier\
-    \ Warranty Exemption Form.\n. Building Plans (MEP drawings are not required)\n\
-    . Transfer Tax Forms (may mention State RTT-BPA and/or NCC Transfer Tax)\n. Lines\
-    \ and Grades Plan (may mention \"Lines and Grades\" or \"L&G Plan\"; generic \"\
-    site plan\" acceptable when summarizing at a high level, provided description\
-    \ doesn't conflict with L&G requirements); \n. Energy Code Compliance form (REScheck\
-    \ or REM/Rate)\n• Outside Agency Approvals (may mention DelDOT Entrance permit/approval\
-    \ required prior to issuance, DNREC Well/Septic, or Public Works Sewer Agreement)."
-  w: 35
-- r: 'Fees. If the response mentions fees, they must match NCC''s published schedule.
-    If no fees are mentioned, full points are awarded. Valid fees: Building Permit
-    ($12/$1,000 valuation, min $60; $5.25/$1,000 over $1M), Certificate of Occupancy
-    ($60 flat), Zoning Permit (10% of Building Permit Fee, $21 min/$145 max), NCC
-    Volunteer Fire Assistance Fund (0.5% of valuation, first $1M only), Engineering
-    Fee ($65/review if Floodplain/Wetland or L&G review required), Sewer Fees (variable,
-    if applicable), Impact Fees (variable, may apply). Deduct all 20 points if: 1.)
-    Response fabricates fees not in this schedule (e.g., "$15 Technology Fee"). (Note:
-    Generic mentions of "plan review fees" are acceptable when summarizing the ePlans
-    workflow and should not be penalized as fabricated, provided no incorrect dollar
-    amount is attached); OR 2.) Response cites a document incorrectly associated with
-    the fees on the county website. The following documents contain fee information:
+      • Completion Phase: Must mention that passing the final inspection AND submitting
+      final documents results in the issuance of the Certificate of Occupancy (CO).'
+    w: 35
+  - r: "Pre-Application & Upload Requirements. The response must describe the permit\
+      \ workflow and include at least three of the core steps listed below, in any\
+      \ order. The agent has flexibility in how much detail it provides for each item,\
+      \ but its description must not contradict the clarifications shown in parentheses.\n\
+      \n• Building Contractor License with Home Warranty Approval OR, if the owner-occupier\
+      \ is acting as their own contractor, the Owner-Occupier Affidavit and Owner-Occupier\
+      \ Warranty Exemption Form.\n. Building Plans (MEP drawings are not required)\n\
+      . Transfer Tax Forms (may mention State RTT-BPA and/or NCC Transfer Tax)\n.\
+      \ Lines and Grades Plan (may mention \"Lines and Grades\" or \"L&G Plan\"; generic\
+      \ \"site plan\" acceptable when summarizing at a high level, provided description\
+      \ doesn't conflict with L&G requirements); \n. Energy Code Compliance form (REScheck\
+      \ or REM/Rate)\n• Outside Agency Approvals (may mention DelDOT Entrance permit/approval\
+      \ required prior to issuance, DNREC Well/Septic, or Public Works Sewer Agreement)."
+    w: 35
+  - r: 'Fees. If the response mentions fees, they must match NCC''s published schedule.
+      If no fees are mentioned, full points are awarded. Valid fees: Building Permit
+      ($12/$1,000 valuation, min $60; $5.25/$1,000 over $1M), Certificate of Occupancy
+      ($60 flat), Zoning Permit (10% of Building Permit Fee, $21 min/$145 max), NCC
+      Volunteer Fire Assistance Fund (0.5% of valuation, first $1M only), Engineering
+      Fee ($65/review if Floodplain/Wetland or L&G review required), Sewer Fees (variable,
+      if applicable), Impact Fees (variable, may apply). Deduct all 20 points if:
+      1.) Response fabricates fees not in this schedule (e.g., "$15 Technology Fee").
+      (Note: Generic mentions of "plan review fees" are acceptable when summarizing
+      the ePlans workflow and should not be penalized as fabricated, provided no incorrect
+      dollar amount is attached); OR 2.) Response cites a document incorrectly associated
+      with the fees on the county website. The following documents contain fee information:
 
-    - https://www.newcastlede.gov/205/Single-Family-Dwelling & https://www.newcastlede.gov/DocumentCenter/View/33001/Single-Family-Dwelling-Building-Permit-Requirements:
-    Building Permit Requirements for SFD; lists Building Permit Fee, COO, Zoning,
-    Fire Fund, Sewer, Impact, and Engineering fees
+      - https://www.newcastlede.gov/205/Single-Family-Dwelling & https://www.newcastlede.gov/DocumentCenter/View/33001/Single-Family-Dwelling-Building-Permit-Requirements:
+      Building Permit Requirements for SFD; lists Building Permit Fee, COO, Zoning,
+      Fire Fund, Sewer, Impact, and Engineering fees
 
-    - https://www.newcastlede.gov/DocumentCenter/View/53391/Chapter-Six-01012026-unofficial-CodeOnly-web
-    (Chapter 6 Building Code): Official comprehensive Schedule of Permit and Review
-    Fees; confirms baseline rates, minimums, maximums, and $5.25/$1,000 rate over
-    $1M
+      - https://www.newcastlede.gov/DocumentCenter/View/53391/Chapter-Six-01012026-unofficial-CodeOnly-web
+      (Chapter 6 Building Code): Official comprehensive Schedule of Permit and Review
+      Fees; confirms baseline rates, minimums, maximums, and $5.25/$1,000 rate over
+      $1M
 
-    - https://www.newcastlede.gov/DocumentCenter/View/32992/Non-Residential-BuildingAddition-Permit-Requirements
-    (Non-Residential Building/Addition): Same fee schedule structure and calculations
-    for non-residential
+      - https://www.newcastlede.gov/DocumentCenter/View/32992/Non-Residential-BuildingAddition-Permit-Requirements
+      (Non-Residential Building/Addition): Same fee schedule structure and calculations
+      for non-residential
 
-    - https://www.newcastlede.gov/DocumentCenter/View/32995/Deck-Permit-Requirements
-    & https://www.newcastlede.gov/DocumentCenter/View/15475/Deck-Permit-Packet (Residential
-    Deck): Same fee structure but with $142 minimum building permit fee for decks'
-  w: 20
-- r: 'Licensing & Insurance Nuance. If response mentions Worker''s Compensation, General
-    Liability Insurance, or Delaware Business License, the framing must be accurate.
-    Correct framings: 1.) Contractor path — these are prerequisites for obtaining
-    the Contractor License, which is then submitted with the permit application; 2.)
-    Owner-Occupier path — these documents are not required; owner-occupiers submit
-    an Affidavit + Warranty Exemption Form instead of a contractor license. Deduct
-    all 20 points if response lists these as direct permit submission documents without
-    proper context. If response doesn''t mention these documents at all, full points
-    are awarded. Response must not overstate the architect/engineer seal requirement
-    for building plans. Correct framing: states seal "may be required" or uses conditional
-    language, or omits the seal requirement when summarizing at a high level. Deduct
-    all 10 points if: 1.) Response states architect/engineer signature/seal IS required,
-    IS mandatory, or MUST be included; OR 2.) Response provides reasoning for the
-    seal requirement that is not grounded in NCC Code Sec. 6.03.013 (which states
-    the Code Official may accept non-professional documents for Group R-3/single-family
-    dwellings). Fabricated explanations (e.g., "required for structural safety," "depends
-    on square footage," or other rationale not in the code) indicate the agent did
-    not access the correct source material.'
-  w: 10
+      - https://www.newcastlede.gov/DocumentCenter/View/32995/Deck-Permit-Requirements
+      & https://www.newcastlede.gov/DocumentCenter/View/15475/Deck-Permit-Packet (Residential
+      Deck): Same fee structure but with $142 minimum building permit fee for decks'
+    w: 20
+  - r: 'Licensing & Insurance Nuance. If response mentions Worker''s Compensation,
+      General Liability Insurance, or Delaware Business License, the framing must
+      be accurate. Correct framings: 1.) Contractor path — these are prerequisites
+      for obtaining the Contractor License, which is then submitted with the permit
+      application; 2.) Owner-Occupier path — these documents are not required; owner-occupiers
+      submit an Affidavit + Warranty Exemption Form instead of a contractor license.
+      Deduct all 20 points if response lists these as direct permit submission documents
+      without proper context. If response doesn''t mention these documents at all,
+      full points are awarded. Response must not overstate the architect/engineer
+      seal requirement for building plans. Correct framing: states seal "may be required"
+      or uses conditional language, or omits the seal requirement when summarizing
+      at a high level. Deduct all 10 points if: 1.) Response states architect/engineer
+      signature/seal IS required, IS mandatory, or MUST be included; OR 2.) Response
+      provides reasoning for the seal requirement that is not grounded in NCC Code
+      Sec. 6.03.013 (which states the Code Official may accept non-professional documents
+      for Group R-3/single-family dwellings). Fabricated explanations (e.g., "required
+      for structural safety," "depends on square footage," or other rationale not
+      in the code) indicate the agent did not access the correct source material.'
+    w: 10

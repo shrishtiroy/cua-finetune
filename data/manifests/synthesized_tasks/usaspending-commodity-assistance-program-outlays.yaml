@@ -1,8 +1,8 @@
-name: usaspending-commodity-assistance-program-outlays
-url: https://www.usaspending.gov/explorer/budget_function
-prompt: In FY 2026 (as of 2/27/2026), how much has the Commodity Assistance Program
-  paid in outlays to the cent?
-rubric:
-- r: States that the Commodity Assistance Program paid $184,508,124.75 in outlays
-    in FY 2026.
-  w: 100
+- name: usaspending-commodity-assistance-program-outlays
+  url: https://www.usaspending.gov/explorer/budget_function
+  prompt: In FY 2026 (as of 2/27/2026), how much has the Commodity Assistance Program
+    paid in outlays to the cent?
+  rubric:
+  - r: States that the Commodity Assistance Program paid $184,508,124.75 in outlays
+      in FY 2026.
+    w: 100

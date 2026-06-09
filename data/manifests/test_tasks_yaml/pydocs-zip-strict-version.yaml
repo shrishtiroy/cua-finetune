@@ -1,17 +1,18 @@
-name: pydocs-zip-strict-version
-url: https://docs.python.org/3/library/functions.html
-prompt: 'On the Python docs Built-in Functions page, find the documentation for zip().
-  The docs describe three different approaches to handling iterables of different
-  lengths. What are these three approaches, and what does the strict=True option do
-  when iterables have different lengths?
+- name: pydocs-zip-strict-version
+  url: https://docs.python.org/3/library/functions.html
+  prompt: 'On the Python docs Built-in Functions page, find the documentation for
+    zip(). The docs describe three different approaches to handling iterables of different
+    lengths. What are these three approaches, and what does the strict=True option
+    do when iterables have different lengths?
 
-  '
-rubric:
-- r: Must mention that by default zip stops when the shortest iterable is exhausted.
-  w: 34
-- r: Must mention itertools.zip_longest for filling in missing values.
-  w: 33
-- r: Must mention strict=True raises a ValueError when iterables have different lengths.
-  w: 33
-archives:
-- docs-python-org
+    '
+  rubric:
+  - r: Must mention that by default zip stops when the shortest iterable is exhausted.
+    w: 34
+  - r: Must mention itertools.zip_longest for filling in missing values.
+    w: 33
+  - r: Must mention strict=True raises a ValueError when iterables have different
+      lengths.
+    w: 33
+  archives:
+  - docs-python-org

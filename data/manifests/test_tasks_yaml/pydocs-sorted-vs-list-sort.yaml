@@ -1,16 +1,16 @@
-name: pydocs-sorted-vs-list-sort
-url: https://docs.python.org/3/library/functions.html
-prompt: 'Using the Python docs, compare the built-in sorted() function (on the Built-in
-  Functions page) with the list.sort() method (on the Built-in Types page). What is
-  the key difference in return value between the two, and do they both support the
-  key and reverse parameters?
+- name: pydocs-sorted-vs-list-sort
+  url: https://docs.python.org/3/library/functions.html
+  prompt: 'Using the Python docs, compare the built-in sorted() function (on the Built-in
+    Functions page) with the list.sort() method (on the Built-in Types page). What
+    is the key difference in return value between the two, and do they both support
+    the key and reverse parameters?
 
-  '
-rubric:
-- r: Must state that sorted() returns a new sorted list while list.sort() sorts the
-    list in-place and returns None.
-  w: 50
-- r: Must confirm that both support the key and reverse keyword arguments.
-  w: 50
-archives:
-- docs-python-org
+    '
+  rubric:
+  - r: Must state that sorted() returns a new sorted list while list.sort() sorts
+      the list in-place and returns None.
+    w: 50
+  - r: Must confirm that both support the key and reverse keyword arguments.
+    w: 50
+  archives:
+  - docs-python-org

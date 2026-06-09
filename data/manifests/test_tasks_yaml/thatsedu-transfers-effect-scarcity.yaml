@@ -1,27 +1,27 @@
-name: thatsedu-transfers-effect-scarcity
-url: https://makinguse.com/thatsedu/
-prompt: 'Go to makinguse.com/thatsedu/ and view the Society perspective for Men. The
-  "Transfers effect" is one of the benefit categories. Most countries show zero for
-  this category. Your task: with all categories enabled, systematically check every
-  single country by clicking on them one at a time to find ALL countries that have
-  a non-zero Transfers effect value. List every country with a non-zero Transfers
-  effect and its exact dollar value. Do not include the OECD average or EU21 average
-  — only actual countries. How many real countries have a non-zero Transfers effect?
-  Once you have your final answer, use the answer tool to submit it.
-
-  '
-rubric:
-- r: 'Must identify Denmark as having a Transfers effect of approximately $4,821 —
-    the only country with a large non-zero value.
+- name: thatsedu-transfers-effect-scarcity
+  url: https://makinguse.com/thatsedu/
+  prompt: 'Go to makinguse.com/thatsedu/ and view the Society perspective for Men.
+    The "Transfers effect" is one of the benefit categories. Most countries show zero
+    for this category. Your task: with all categories enabled, systematically check
+    every single country by clicking on them one at a time to find ALL countries that
+    have a non-zero Transfers effect value. List every country with a non-zero Transfers
+    effect and its exact dollar value. Do not include the OECD average or EU21 average
+    — only actual countries. How many real countries have a non-zero Transfers effect?
+    Once you have your final answer, use the answer tool to submit it.
 
     '
-  w: 50
-- r: 'Must identify New Zealand as having a Transfers effect of approximately $6.
-    Must state that exactly 2 actual countries (Denmark and New Zealand) have non-zero
-    Transfers effect values, excluding the OECD average ($172) and EU21 average ($284)
-    which are aggregate rows, not countries.
+  rubric:
+  - r: 'Must identify Denmark as having a Transfers effect of approximately $4,821
+      — the only country with a large non-zero value.
 
-    '
-  w: 50
-archives:
-- thatsedu
+      '
+    w: 50
+  - r: 'Must identify New Zealand as having a Transfers effect of approximately $6.
+      Must state that exactly 2 actual countries (Denmark and New Zealand) have non-zero
+      Transfers effect values, excluding the OECD average ($172) and EU21 average
+      ($284) which are aggregate rows, not countries.
+
+      '
+    w: 50
+  archives:
+  - thatsedu

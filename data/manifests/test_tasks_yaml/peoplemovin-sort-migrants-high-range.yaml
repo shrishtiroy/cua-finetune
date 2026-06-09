@@ -1,14 +1,14 @@
-name: peoplemovin-sort-migrants-high-range
-url: https://peoplemov.in/
-prompt: 'Using the data on this site, look up the number of migrants for each of the
-  following country pairs (from → to). Sort them from fewest to most migrants and
-  return the count for each: - Czech Republic to Switzerland - Indonesia to Germany
-  - Spain to Ireland
-
-  '
-rubric:
-- r: 'Correctly sorts as: Spain to Ireland (10,181), Czech Republic to Switzerland
-    (16,133), Indonesia to Germany (18,441).
+- name: peoplemovin-sort-migrants-high-range
+  url: https://peoplemov.in/
+  prompt: 'Using the data on this site, look up the number of migrants for each of
+    the following country pairs (from → to). Sort them from fewest to most migrants
+    and return the count for each: - Czech Republic to Switzerland - Indonesia to
+    Germany - Spain to Ireland
 
     '
-  w: 100
+  rubric:
+  - r: 'Correctly sorts as: Spain to Ireland (10,181), Czech Republic to Switzerland
+      (16,133), Indonesia to Germany (18,441).
+
+      '
+    w: 100

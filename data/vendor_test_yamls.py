@@ -130,7 +130,11 @@ def main() -> int:
         rel_source = str(source.relative_to(SIBLINGS) if source.is_relative_to(SIBLINGS) else source)
         if not args.dry_run:
             with out_path.open("w", encoding="utf-8") as h:
-                yaml.safe_dump(task_def, h, sort_keys=False, allow_unicode=True)
+                # conduit's task_loader.load_tasks() expects either a top-level
+                # list of task dicts OR a dict with a ``tasks:`` key. Writing a
+                # bare dict makes it return [] silently. Wrap as a 1-element
+                # list so load_tasks works.
+                yaml.safe_dump([task_def], h, sort_keys=False, allow_unicode=True)
         found_summary.append({
             "name": name,
             "category": cat,

@@ -63,9 +63,22 @@ export HF_HOME="${HF_HOME:-${HOME}/.cache/huggingface}"
 mkdir -p "${HF_HOME}"
 
 EXTRA_ARGS=()
+
+# Per-model overrides:
+#  * --trust-remote-code for models that ship custom modeling code on HF.
+#  * --max-model-len capped to whatever the model's config.json actually
+#    supports. DeepSeek-VL2-Small declares max_position_embeddings=4096,
+#    so vLLM rejects 16384 with a hard validation error. Other models
+#    we use default to a 16384 ceiling, which is well within their
+#    supported context.
+MAX_MODEL_LEN=16384
 case "$MODEL" in
-  *Kimi-VL*|*deepseek-vl2*)
+  *Kimi-VL*)
     EXTRA_ARGS+=(--trust-remote-code)
+    ;;
+  *deepseek-vl2*)
+    EXTRA_ARGS+=(--trust-remote-code)
+    MAX_MODEL_LEN=4096
     ;;
 esac
 
@@ -75,9 +88,10 @@ if [[ -n "$ADAPTER_PATH" ]]; then
 else
   echo "Serving $MODEL baseline (no LoRA). Use model=\"$MODEL\" in /v1/chat/completions."
 fi
+echo "  max_model_len=${MAX_MODEL_LEN}"
 
 vllm serve "$MODEL" \
-  --max-model-len 16384 \
+  --max-model-len "${MAX_MODEL_LEN}" \
   --tensor-parallel-size 1 \
   --port "$PORT" \
   --gpu-memory-utilization 0.92 \

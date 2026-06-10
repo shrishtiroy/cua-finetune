@@ -13,14 +13,15 @@
 #   scripts/eval_browser_baseline.sh <BACKEND> [ADAPTER_NAME] [PASS_K]
 #
 # Args:
-#   BACKEND       - qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua
+#   BACKEND       - qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua | gemma_vl_cua
 #   ADAPTER_NAME  - "baseline" (default; uses bare base model) or "cua" (uses LoRA)
 #   PASS_K        - number of trials per task (default 1)
 #
 # Examples:
-#   scripts/eval_browser_baseline.sh qwen_vl_cua                     # 24 tasks x 1 trial
-#   scripts/eval_browser_baseline.sh qwen_vl_cua cua 5               # 24 tasks x 5 trials, with LoRA
+#   scripts/eval_browser_baseline.sh qwen_vl_cua                     # 26 tasks x 1 trial
+#   scripts/eval_browser_baseline.sh qwen_vl_cua cua 5               # 26 tasks x 5 trials, with LoRA
 #   scripts/eval_browser_baseline.sh kimi_vl_cua baseline 1
+#   scripts/eval_browser_baseline.sh gemma_vl_cua baseline 1         # google/gemma-3-12b-it
 #
 # Output:
 #   ~/cua-finetune/results/<BACKEND>/<ADAPTER_NAME>/<task>/<ts>/...
@@ -28,7 +29,7 @@
 
 set -euo pipefail
 
-BACKEND="${1:?BACKEND required (qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua)}"
+BACKEND="${1:?BACKEND required (qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua | gemma_vl_cua)}"
 ADAPTER="${2:-baseline}"
 PASS_K="${3:-1}"
 
@@ -75,6 +76,7 @@ if ! curl -fsS "http://127.0.0.1:${VLLM_PORT}/v1/models" >/dev/null 2>&1; then
     kimi_vl_cua)     echo "  scripts/serve_vllm.sh moonshotai/Kimi-VL-A3B-Instruct" >&2 ;;
     deepseek_vl_cua) echo "  scripts/serve_vllm.sh deepseek-ai/deepseek-vl2-small" >&2 ;;
     llama_vision_cua) echo "  scripts/serve_vllm.sh meta-llama/Llama-3.2-11B-Vision-Instruct" >&2 ;;
+    gemma_vl_cua)    echo "  scripts/serve_vllm.sh google/gemma-3-12b-it" >&2 ;;
   esac
   exit 2
 fi

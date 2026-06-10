@@ -57,6 +57,24 @@ TASK_DIRS = [
     REPO_ROOT / "data" / "manifests" / "test_tasks_yaml",
 ]
 
+# HF model-id substring -> backend name. Lets users pass --model
+# google/gemma-3-12b-it instead of remembering the internal backend slug.
+# Each substring is matched case-sensitively against the --model value.
+MODEL_TO_BACKEND = [
+    ("Qwen/Qwen3-VL", "qwen_vl_cua"),
+    ("moonshotai/Kimi-VL", "kimi_vl_cua"),
+    ("deepseek-ai/deepseek-vl2", "deepseek_vl_cua"),
+    ("meta-llama/Llama-3.2", "llama_vision_cua"),
+    ("google/gemma-3", "gemma_vl_cua"),
+]
+
+
+def _backend_from_model(model: str) -> str | None:
+    for needle, backend in MODEL_TO_BACKEND:
+        if needle in model:
+            return backend
+    return None
+
 
 def _flatten_held_out(payload: dict[str, Any]) -> list[tuple[str, str]]:
     """Return [(category, task_name), ...].
@@ -101,8 +119,12 @@ def _resolve_task(name: str):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run held-out tasks against a CUA backend")
-    parser.add_argument("--backend", required=True,
-                        choices=["qwen_vl_cua", "llama_vision_cua", "kimi_vl_cua", "deepseek_vl_cua"])
+    parser.add_argument("--backend", required=False,
+                        choices=["qwen_vl_cua", "llama_vision_cua", "kimi_vl_cua",
+                                 "deepseek_vl_cua", "gemma_vl_cua"])
+    parser.add_argument("--model", default=None,
+                        help="HF model id (e.g. google/gemma-3-12b-it). When --backend "
+                             "is omitted, the backend is inferred from this string.")
     parser.add_argument("--held-out", type=Path, default=DEFAULT_HELDOUT)
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS)
     parser.add_argument("--pass-k", type=int, default=5)
@@ -126,6 +148,21 @@ def main() -> int:
         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
         level=logging.DEBUG if args.verbose else logging.INFO,
     )
+
+    # Resolve --backend / --model: at least one is required. If --backend is
+    # omitted but --model is given, infer the backend from the HF model id.
+    if not args.backend:
+        if not args.model:
+            parser.error("either --backend or --model is required")
+        inferred = _backend_from_model(args.model)
+        if inferred is None:
+            parser.error(
+                f"could not infer backend from --model {args.model!r}. "
+                f"Pass --backend explicitly. Known prefixes: "
+                f"{[n for n, _ in MODEL_TO_BACKEND]}"
+            )
+        logger.info("Inferred --backend %s from --model %s", inferred, args.model)
+        args.backend = inferred
 
     if not args.held_out.exists():
         print(f"ERROR: held_out_tasks.yaml not found at {args.held_out}", file=sys.stderr)

@@ -14,10 +14,12 @@
 #   scripts/serve_vllm.sh Qwen/Qwen3-VL-8B-Instruct
 #   scripts/serve_vllm.sh moonshotai/Kimi-VL-A3B-Instruct '' 8000
 #   scripts/serve_vllm.sh deepseek-ai/deepseek-vl2-small '' 8000
+#   scripts/serve_vllm.sh google/gemma-3-12b-it '' 8000
 #
 #   # Baseline + LoRA loaded:
 #   scripts/serve_vllm.sh Qwen/Qwen3-VL-8B-Instruct           checkpoints/qwen3_vl_8b_cua/best
 #   scripts/serve_vllm.sh meta-llama/Llama-3.2-11B-Vision-Instruct checkpoints/llama3_2_vision_11b_cua/best
+#   scripts/serve_vllm.sh google/gemma-3-12b-it               checkpoints/gemma3_12b_cua/best
 set -euo pipefail
 
 MODEL="${1:?MODEL required}"
@@ -79,6 +81,14 @@ case "$MODEL" in
   *deepseek-vl2*)
     EXTRA_ARGS+=(--trust-remote-code)
     MAX_MODEL_LEN=4096
+    ;;
+  google/gemma-3-*)
+    # Gemma 3 is supported natively in transformers + vLLM (>= 0.8.x), so we
+    # do NOT pass --trust-remote-code. The model's native context is 128K;
+    # 16384 is plenty for CUA turns and keeps the KV cache off the GPU
+    # memory cliff on a single H100. bfloat16 matches Gemma 3's training
+    # dtype and avoids the fp16 accuracy hit on the SigLIP vision tower.
+    EXTRA_ARGS+=(--dtype bfloat16)
     ;;
 esac
 

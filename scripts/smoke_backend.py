@@ -65,7 +65,8 @@ def _make_dummy_screenshot() -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="End-to-end backend JSON-parse smoke")
     parser.add_argument("--backend", required=True,
-                        choices=["qwen_vl_cua", "kimi_vl_cua", "deepseek_vl_cua", "llama_vision_cua"])
+                        choices=["qwen_vl_cua", "kimi_vl_cua", "deepseek_vl_cua",
+                                 "llama_vision_cua", "gemma_vl_cua"])
     parser.add_argument("--instruction", default=("Find the blue button labelled 'Click me' "
                                                   "and click it. Output JSON only."))
     parser.add_argument("--adapter", default=os.environ.get("CUA_LORA_ADAPTER", "baseline"),
@@ -105,6 +106,7 @@ def main() -> int:
             "kimi_vl_cua": "moonshotai/Kimi-VL-A3B-Instruct",
             "deepseek_vl_cua": "deepseek-ai/deepseek-vl2-small",
             "llama_vision_cua": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+            "gemma_vl_cua": "google/gemma-3-12b-it",
         }
         print(f"  bash scripts/serve_vllm.sh {case_to_model[args.backend]}", file=sys.stderr)
         return 2

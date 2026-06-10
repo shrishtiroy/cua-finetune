@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-BACKEND="${1:?BACKEND required (qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua)}"
+BACKEND="${1:?BACKEND required (qwen_vl_cua | kimi_vl_cua | deepseek_vl_cua | llama_vision_cua | gemma_vl_cua)}"
 ADAPTER="${2:-baseline}"
 
 CUA_REPO="${HOME}/cua-finetune"

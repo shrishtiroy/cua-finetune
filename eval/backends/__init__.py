@@ -13,6 +13,7 @@ _BACKEND_REGISTRY = {
     "llama_vision_cua": ("eval.backends.llama_vision_cua", "LlamaVisionCuaBackend"),
     "kimi_vl_cua": ("eval.backends.kimi_vl_cua", "KimiVLCuaBackend"),
     "deepseek_vl_cua": ("eval.backends.deepseek_vl_cua", "DeepSeekVLCuaBackend"),
+    "gemma_vl_cua": ("eval.backends.gemma_vl_cua", "GemmaVLCuaBackend"),
 }
 
 

@@ -93,8 +93,16 @@ case "$MODEL" in
 esac
 
 if [[ -n "$ADAPTER_PATH" ]]; then
-  EXTRA_ARGS+=(--enable-lora --lora-modules "cua=$ADAPTER_PATH" --max-loras 1)
-  echo "Serving $MODEL with LoRA adapter at $ADAPTER_PATH (use model=\"cua\" or model=\"$MODEL\")."
+  # Auto-detect LoRA rank from adapter_config.json so we don't have to keep this
+  # in sync with the training config. ms-swift's default in our configs is r=64,
+  # but vLLM's default --max-lora-rank is 16, so we'd otherwise get
+  # "LoRA rank 64 is greater than max_lora_rank 16" at adapter-load time.
+  ADAPTER_RANK=64
+  if [[ -f "$ADAPTER_PATH/adapter_config.json" ]]; then
+    ADAPTER_RANK=$(python3 -c "import json; print(json.load(open('$ADAPTER_PATH/adapter_config.json')).get('r', 64))" 2>/dev/null || echo 64)
+  fi
+  EXTRA_ARGS+=(--enable-lora --lora-modules "cua=$ADAPTER_PATH" --max-loras 1 --max-lora-rank "$ADAPTER_RANK")
+  echo "Serving $MODEL with LoRA adapter at $ADAPTER_PATH (rank=$ADAPTER_RANK, use model=\"cua\" or model=\"$MODEL\")."
 else
   echo "Serving $MODEL baseline (no LoRA). Use model=\"$MODEL\" in /v1/chat/completions."
 fi

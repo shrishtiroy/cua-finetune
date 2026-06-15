@@ -242,15 +242,50 @@ def _extract_answer_from_args(args: Any) -> str | None:
     return None
 
 
-def extract_declared_answer(trajectory: dict[str, Any]) -> tuple[str | None, str]:
+def _looks_like_action_payload(text: str) -> bool:
+    """Heuristic: does this 'message' look like our JSON action envelope?
+
+    Qwen emits ``{"reasoning": "...", "action": {"function_name": "click", ...}}``
+    on every step as the assistant message. That's mid-task reasoning, not a
+    declared final answer. Detect it so we don't grade it as one.
+    """
+    s = text.strip()
+    if not s.startswith("{"):
+        return False
+    if '"action"' in s and '"function_name"' in s:
+        return True
+    try:
+        obj = json.loads(s)
+    except (json.JSONDecodeError, ValueError):
+        return False
+    if isinstance(obj, dict):
+        action = obj.get("action")
+        if isinstance(action, dict) and "function_name" in action:
+            return True
+        if "function_name" in obj:
+            return True
+    return False
+
+
+def extract_declared_answer(
+    trajectory: dict[str, Any],
+    *,
+    allow_message_fallback: bool = False,
+) -> tuple[str | None, str]:
     """Return ``(answer, source)`` where ``source`` describes how it was found.
 
     Priority:
       1. Last step containing a tool_call with function_name in
          ANSWER_FUNCTION_NAMES \u2192 extract from arguments.
-      2. Last agent step's ``message`` field (string or list-of-parts), if
-         non-empty.
+      2. **Only if** ``allow_message_fallback=True``: last agent step's
+         ``message`` field (string or list-of-parts), if non-empty AND it does
+         not look like a JSON action payload.
       3. ``(None, "none")`` \u2192 caller should score 0.0 without an LLM call.
+
+    Defaulting fallback to off is the strict policy: a model that never emitted
+    ``answer`` / ``terminate`` / ``done`` (etc.) genuinely never declared an
+    answer; mid-task reasoning embedded in JSON action payloads should not be
+    graded as if it were one.
     """
     steps = trajectory.get("steps") or []
     if not isinstance(steps, list):
@@ -277,6 +312,9 @@ def extract_declared_answer(trajectory: dict[str, Any]) -> tuple[str | None, str
                 return msg, f"tool_call:{fn}+message"
             return None, f"tool_call:{fn}+empty"
 
+    if not allow_message_fallback:
+        return None, "none"
+
     for step in reversed(steps):
         if not isinstance(step, dict):
             continue
@@ -284,8 +322,12 @@ def extract_declared_answer(trajectory: dict[str, Any]) -> tuple[str | None, str
         if src not in ("assistant", "agent", "model", None):
             continue
         msg = _step_message_text(step.get("message"))
-        if msg:
-            return msg, "assistant_message"
+        if not msg:
+            continue
+        if _looks_like_action_payload(msg):
+            # Mid-task action JSON, not a declared answer. Keep walking.
+            continue
+        return msg, "assistant_message"
 
     return None, "none"
 
@@ -554,6 +596,7 @@ def regrade(
     bedrock_model: str = DEFAULT_BEDROCK_MODEL,
     dry_run: bool = False,
     max_tasks: int | None = None,
+    allow_message_fallback: bool = False,
 ) -> int:
     task_yaml_roots = task_yaml_roots or DEFAULT_TASK_YAML_ROOTS
     base = results_root / backend / adapter
@@ -610,7 +653,9 @@ def regrade(
             print(f"  {task_name}: trajectory unreadable ({exc})", file=sys.stderr)
             continue
 
-        declared, source = extract_declared_answer(trajectory)
+        declared, source = extract_declared_answer(
+            trajectory, allow_message_fallback=allow_message_fallback,
+        )
         yaml_path, prompt, rubric_items = load_task_rubric(task_name, task_yaml_roots)
         orig = orig_scores.get(task_name)
 
@@ -742,6 +787,15 @@ def main() -> int:
         default=None,
         help="Process only the first N tasks (alphabetical). For smoke tests.",
     )
+    parser.add_argument(
+        "--allow-message-fallback",
+        action="store_true",
+        help="If no answer/terminate/done tool call is found, fall back to the "
+             "last assistant message (skipping JSON action payloads). Default "
+             "off — strict policy treats trajectories without an explicit "
+             "answer tool call as score=0.0. Use this only if your agent "
+             "legitimately puts answers in natural-language final messages.",
+    )
     args = parser.parse_args()
     return regrade(
         args.backend,
@@ -751,6 +805,7 @@ def main() -> int:
         bedrock_model=args.bedrock_model,
         dry_run=args.dry_run,
         max_tasks=args.max_tasks,
+        allow_message_fallback=args.allow_message_fallback,
     )
 
 
